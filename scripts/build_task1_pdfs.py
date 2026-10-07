@@ -324,12 +324,15 @@ def build_slides_pdf():
     c = canvas.Canvas(str(OUT_SLIDES), pagesize=page)
     W, H = page
 
-    # map slide index → optional figure
+    # 0-based slide index → figure (pitch deck, title=0)
     fig_for = {
-        5: FIGURES / "fig_final.png",       # clusters — use final
-        6: FIGURES / "fig_bootstrap.png",   # stability
-        3: FIGURES / "fig_network.png",     # method / network
+        1: FIGURES / "fig_final.png",       # hook: 280 МО / ось (нет геокарты)
+        5: FIGURES / "fig_final.png",       # median cut U1 → 140/140
+        6: FIGURES / "fig_bootstrap.png",   # stability cards
+        7: FIGURES / "fig_dynamic.png",     # dynamics: PR/Frustration/ARI
+        9: FIGURES / "fig_final.png",       # final portrait
     }
+    fig_slides = set(fig_for)
 
     for i, (title, body_lines) in enumerate(slides):
         # background
@@ -350,36 +353,36 @@ def build_slides_pdf():
         c.setFillColor(colors.HexColor("#222222"))
         max_text_w = W - 2.4 * cm
         fig = fig_for.get(i)
-        if fig and fig.exists() and i in (3, 5, 6):
+        show_fig = bool(fig and fig.exists() and i in fig_slides)
+        if show_fig:
             max_text_w = W * 0.52
 
-        in_table = False
         for ln in body_lines:
             if not ln.strip():
                 y -= 0.25 * cm
                 continue
+            # skip markdown figure hints (embedded via fig_for)
+            if "figures/" in ln or ln.strip().startswith("**Рисунок"):
+                continue
             if ln.strip().startswith("|"):
-                # render table rows as monospace-ish text
                 row = _strip_md(ln.strip())
                 c.setFont(font, 9)
                 c.drawString(1.2 * cm, y, row[:110])
                 y -= 0.45 * cm
-                in_table = True
                 if y < 1.5 * cm:
                     break
                 continue
-            in_table = False
             text = _strip_md(ln.strip())
             if text.startswith("- "):
                 text = "• " + text[2:]
-            size = 12 if i == 0 else 11
-            c.setFont(font_b if i == 0 and not text.startswith("•") else font, size)
-            # wrap
+            size = 13 if i == 0 else 11
+            use_bold = i == 0 and not text.startswith("•")
+            c.setFont(font_b if use_bold else font, size)
             words = text.split()
             line = ""
             for w in words:
                 trial = (line + " " + w).strip()
-                if c.stringWidth(trial, font if not (i == 0) else font_b, size) < max_text_w:
+                if c.stringWidth(trial, font_b if use_bold else font, size) < max_text_w:
                     line = trial
                 else:
                     c.drawString(1.2 * cm, y, line)
@@ -393,7 +396,7 @@ def build_slides_pdf():
             if y < 1.5 * cm:
                 break
 
-        if fig and fig.exists() and i in (3, 5, 6):
+        if show_fig:
             try:
                 from reportlab.lib.utils import ImageReader
                 iw, ih = 9.5 * cm, 7.0 * cm
