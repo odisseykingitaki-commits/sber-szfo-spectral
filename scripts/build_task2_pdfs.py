@@ -91,6 +91,7 @@ def build_report_pdf():
     from reportlab.platypus import (
         Image,
         KeepTogether,
+        PageBreak,
         Paragraph,
         Preformatted,
         SimpleDocTemplate,
@@ -106,8 +107,8 @@ def build_report_pdf():
     doc = SimpleDocTemplate(
         str(OUT_REPORT),
         pagesize=A4,
-        leftMargin=1.8 * cm,
-        rightMargin=1.8 * cm,
+        leftMargin=1.6 * cm,
+        rightMargin=1.6 * cm,
         topMargin=1.5 * cm,
         bottomMargin=1.5 * cm,
         title="Task 2 — Методологический отчёт",
@@ -155,14 +156,23 @@ def build_report_pdf():
     styles.add(ParagraphStyle(
         name="CellR", fontName=font, fontSize=7.5, leading=9.5,
     ))
+    styles.add(ParagraphStyle(
+        name="CellSmallR", fontName=font, fontSize=6.2, leading=7.8,
+    ))
+    styles.add(ParagraphStyle(
+        name="ArchCodeR", fontName=font, fontSize=6.5, leading=8.0,
+        backColor=colors.HexColor("#f4f4f4"), leftIndent=2, spaceAfter=6,
+    ))
 
     story = []
     in_code = False
     code_buf: list[str] = []
     table_buf: list[list[str]] = []
+    pending_h2: str | None = None  # hold H2 until we know if next block is architecture
+    pending_subhead = None  # H3/H4 held to KeepTogether with following table
 
     def flush_table():
-        nonlocal table_buf
+        nonlocal table_buf, pending_subhead
         if not table_buf:
             return
         rows = table_buf
@@ -171,38 +181,78 @@ def build_report_pdf():
         for row in rows:
             if all(re.match(r"^:?-+:?$", c.strip()) for c in row):
                 continue
-            data.append([Paragraph(_strip_md(c).replace("|", ""), styles["CellR"]) for c in row])
+            data.append(row)
         if not data:
             return
         ncols = max(len(r) for r in data)
-        for r in data:
-            while len(r) < ncols:
-                r.append(Paragraph("", styles["CellR"]))
+        # Wide MAE tables (many model columns): smaller font, keep on one page
+        wide = ncols >= 8
+        cell_style = styles["CellSmallR"] if wide else styles["CellR"]
+        rendered = []
+        for row in data:
+            cells = [Paragraph(_strip_md(c).replace("|", ""), cell_style) for c in row]
+            while len(cells) < ncols:
+                cells.append(Paragraph("", cell_style))
+            rendered.append(cells)
         tw = doc.width
-        col_w = [tw / ncols] * ncols
-        t = Table(data, colWidths=col_w, repeatRows=1)
+        if wide:
+            # Narrow H / winner cols; share remaining width among numeric models
+            col_w = []
+            for i in range(ncols):
+                header = _strip_md(data[0][i]).lower() if i < len(data[0]) else ""
+                if i == 0 or "winner" in header or header in ("h",):
+                    col_w.append(tw * 0.07)
+                else:
+                    col_w.append(tw * 0.86 / max(ncols - 2, 1))
+            # normalize
+            s = sum(col_w)
+            col_w = [w * tw / s for w in col_w]
+        else:
+            col_w = [tw / ncols] * ncols
+        t = Table(rendered, colWidths=col_w, repeatRows=0)
         t.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e8eef5")),
             ("FONTNAME", (0, 0), (-1, 0), font_b),
             ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#99a")),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 2),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 2),
-            ("TOPPADDING", (0, 0), (-1, -1), 2),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+            ("LEFTPADDING", (0, 0), (-1, -1), 1 if wide else 2),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 1 if wide else 2),
+            ("TOPPADDING", (0, 0), (-1, -1), 1 if wide else 2),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 1 if wide else 2),
+            ("NOSPLIT", (0, 0), (-1, -1)),
         ]))
-        story.append(t)
-        story.append(Spacer(1, 6))
+        block = []
+        if pending_subhead is not None:
+            block.append(pending_subhead)
+            pending_subhead = None
+        block.extend([t, Spacer(1, 6)])
+        story.append(KeepTogether(block))
 
     def flush_code():
-        nonlocal code_buf, in_code
+        nonlocal code_buf, in_code, pending_h2
         if not code_buf:
             in_code = False
             return
         text = "\n".join(code_buf)
-        story.append(Preformatted(text, styles["CodeR"]))
+        is_arch = ("УРОВЕНЬ A" in text) or ("УРОВЕНЬ B" in text) or ("Task 1 (вход)" in text)
+        style = styles["ArchCodeR"] if is_arch else styles["CodeR"]
+        block = [Preformatted(text, style)]
+        if pending_h2 is not None:
+            # Architecture section: keep H2 + diagram on one page
+            story.append(PageBreak())
+            block = [Paragraph(pending_h2, styles["H2R"])] + block
+            pending_h2 = None
+            story.append(KeepTogether(block))
+        else:
+            story.append(KeepTogether(block) if is_arch else Preformatted(text, style))
         code_buf = []
         in_code = False
+
+    def flush_pending_h2():
+        nonlocal pending_h2
+        if pending_h2 is not None:
+            story.append(Paragraph(pending_h2, styles["H2R"]))
+            pending_h2 = None
 
     lines = md.splitlines()
     first_h1 = True
@@ -221,6 +271,7 @@ def build_report_pdf():
 
         m_img = re.search(r"!\[([^\]]*)\]\(([^)]+)\)", line)
         if m_img:
+            flush_pending_h2()
             flush_table()
             alt, rel = m_img.group(1), m_img.group(2)
             img_path = (DOCS / rel).resolve() if not Path(rel).is_absolute() else Path(rel)
@@ -238,6 +289,8 @@ def build_report_pdf():
             continue
 
         if line.strip().startswith("|"):
+            # If we held an H2 waiting for code, flush it — tables are not architecture
+            flush_pending_h2()
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
             table_buf.append(cells)
             continue
@@ -245,10 +298,12 @@ def build_report_pdf():
             flush_table()
 
         if not line.strip():
-            story.append(Spacer(1, 3))
+            if pending_h2 is None:
+                story.append(Spacer(1, 3))
             continue
 
         if line.startswith("# "):
+            flush_pending_h2()
             flush_table()
             txt = _strip_md(line[2:])
             if first_h1:
@@ -258,23 +313,57 @@ def build_report_pdf():
                 story.append(Paragraph(txt, styles["H1R"]))
             continue
         if line.startswith("## "):
-            story.append(Paragraph(_strip_md(line[3:]), styles["H2R"]))
+            flush_pending_h2()
+            if pending_subhead is not None:
+                story.append(pending_subhead)
+                pending_subhead = None
+            h2_txt = _strip_md(line[3:])
+            # Defer architecture H2 so it can KeepTogether with the ASCII diagram
+            if "Архитектура" in h2_txt:
+                pending_h2 = h2_txt
+            elif h2_txt.startswith("4."):
+                # Fresh page before forecast/MAE section so first MAE table fits
+                story.append(PageBreak())
+                story.append(Paragraph(h2_txt, styles["H2R"]))
+            else:
+                story.append(Paragraph(h2_txt, styles["H2R"]))
             continue
-        if line.startswith("### "):
-            story.append(Paragraph(_strip_md(line[4:]), styles["H3R"]))
+        if line.startswith("### ") or line.startswith("#### "):
+            flush_pending_h2()
+            if pending_subhead is not None:
+                story.append(pending_subhead)
+            level = 4 if line.startswith("#### ") else 3
+            txt = _strip_md(line[level + 1 :])
+            pending_subhead = Paragraph(txt, styles["H3R"])
             continue
         if line.strip() in ("---", "***"):
             continue
         if line.lstrip().startswith("- ") or line.lstrip().startswith("* "):
+            flush_pending_h2()
+            if pending_subhead is not None:
+                story.append(pending_subhead)
+                pending_subhead = None
             story.append(Paragraph("• " + _strip_md(line.lstrip()[2:]), styles["BulletR"]))
             continue
         if re.match(r"^\d+\.\s", line.lstrip()):
+            flush_pending_h2()
+            if pending_subhead is not None:
+                story.append(pending_subhead)
+                pending_subhead = None
             story.append(Paragraph(_strip_md(line.lstrip()), styles["BulletR"]))
             continue
 
+        flush_pending_h2()
+        if pending_subhead is not None:
+            story.append(pending_subhead)
+            pending_subhead = None
         style = styles["MetaR"] if line.startswith("**") and ":" in line[:40] else styles["BodyR"]
         story.append(Paragraph(_strip_md(line), style))
 
+    flush_pending_h2()
+    if pending_subhead is not None:
+        story.append(pending_subhead)
+        pending_subhead = None
     flush_table()
     flush_code()
 
@@ -344,7 +433,7 @@ def build_slides_pdf():
         c.setFont(font, 8)
         c.drawRightString(
             W - 1.0 * cm, 0.5 * cm,
-            f"Task 2 · {i + 1}/{len(slides)} · репозиторий: локально / будет на GitHub",
+            f"Task 2 · {i + 1}/{len(slides)} · репозиторий: локально, публикация — после конкурса",
         )
 
         y = H - 2.2 * cm
