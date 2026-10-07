@@ -219,19 +219,23 @@ PR₊ снижается 4.303 → 4.267 → 4.162; Frustration стабилен
 
 ---
 
-## 6. Внешний сигнал: Trends + попытка GDELT
+## 6. Внешний сигнал: Trends; попытка GDELT
 
-Критерий «интеграция новостей» (15%) **частично затронут, не закрыт как win**. Google Trends — прокси; GDELT events — попытка intensity-индекса без систематического MAE-выигрыша.
+Критерий «интеграция новостей» (15%) **не закрыт** выигрышем по MAE. Google Trends — прокси; плюс честная попытка GDELT.
 
 Что сделано:
 
 - Google Trends как **прокси** внешнего интереса (region avg → date merge).  
-- Попытка GDELT (events v2, 2023–2024): месячный intensity **Russia-wide** (СЗФО по топонимам слишком редкий) → lag-1 → LGBM. Систематического выигрыша MAE нет (заметно только городские H=1 ≈ −5.6%); слайд News не форсируем. Артефакты: `results/forecast_news.csv`, `data/processed/gdelt_news_monthly.csv`.  
+- **GDELT DOC API** (`timelinevol`, `sourcecountry:Russia`, 2023–2024): месячный intensity → z-score → `news_intensity_lag1` → merge к обоим кластерам (как Trends). Скрипт: `scripts/run_gdelt_task2.py` → `results/forecast_news.csv`.  
 
 Ограничения:
 
-- Один агрегат Trends на оба кластера; после leakage-fix часто **ухудшает** MAE.  
-- GDELT geo для СЗФО слаб; NLP по текстам статей не делали. Детали — `docs/TASK2_GAPS.md`.
+- Один агрегат на оба кластера; гео **Russia-wide**, не СЗФО (keyword-фильтр NWFD слишком слабый).  
+- После leakage-fix Trends часто **ухудшают** MAE.  
+- `lgbm_news`: ΔMAE vs baseline LGBM = **0** на 6/6 клетках (feature importance news = 0 при тех же гиперпараметрах).  
+- NLP по корпусу новостей СЗФО не строили; слайд «News: GDELT» не добавляли.
+
+См. `docs/TASK2_GAPS.md` § GDELT attempt.
 
 ---
 
