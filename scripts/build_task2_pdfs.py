@@ -27,15 +27,16 @@ SLIDE_ASSETS = [
     ASSETS / "slide02_two_levels.png",
     ASSETS / "slide03_architecture.png",
     ASSETS / "slide04_leakage_note.png",
-    ASSETS / "slide05_mae_heatmap.png",
-    ASSETS / "slide06_winner_map.png",
-    ASSETS / "slide07_rural_h3_case.png",
-    ASSETS / "slide08_changepoint_consensus.png",
-    ASSETS / "slide09_cp_example.png",
-    ASSETS / "slide10_trends_not_news.png",
-    ASSETS / "slide11_gaps.png",
-    ASSETS / "slide12_takeaways.png",
+    ASSETS / "slide05_mae_grid.png",
+    ASSETS / "slide06_rural_h3_case.png",
+    ASSETS / "slide07_changepoint_consensus.png",
+    ASSETS / "slide08_cp_example.png",          # slide 8 also embeds mini-chart below
+    ASSETS / "slide09_trends_not_news.png",
+    ASSETS / "slide10_gaps.png",
+    ASSETS / "slide11_takeaways.png",
 ]
+# Extra mini-chart for changepoint 2024-09 slide (embedded beside main fig when present)
+SLIDE_CP_MINI = ASSETS / "slide_cp_pr_frust.png"
 
 
 def _find_font_paths():
@@ -488,16 +489,39 @@ def build_slides_pdf():
         if show_fig:
             try:
                 from reportlab.lib.utils import ImageReader
-                iw, ih = (11.5 * cm, 7.2 * cm) if i in (0, last_i) else (10.0 * cm, 7.0 * cm)
-                c.drawImage(
-                    ImageReader(str(fig)),
-                    W - iw - 0.8 * cm,
-                    1.3 * cm,
-                    width=iw,
-                    height=ih,
-                    preserveAspectRatio=True,
-                    mask="auto",
-                )
+                # Slide 8 (0-based index 7): main CP chart + mini PR₊/Frustration
+                if i == 7 and SLIDE_CP_MINI.exists():
+                    iw, ih = 9.0 * cm, 5.8 * cm
+                    c.drawImage(
+                        ImageReader(str(fig)),
+                        W - iw - 0.8 * cm,
+                        3.6 * cm,
+                        width=iw,
+                        height=ih,
+                        preserveAspectRatio=True,
+                        mask="auto",
+                    )
+                    mw, mh = 7.0 * cm, 3.2 * cm
+                    c.drawImage(
+                        ImageReader(str(SLIDE_CP_MINI)),
+                        W - mw - 1.5 * cm,
+                        0.9 * cm,
+                        width=mw,
+                        height=mh,
+                        preserveAspectRatio=True,
+                        mask="auto",
+                    )
+                else:
+                    iw, ih = (11.5 * cm, 7.2 * cm) if i in (0, last_i) else (10.0 * cm, 7.0 * cm)
+                    c.drawImage(
+                        ImageReader(str(fig)),
+                        W - iw - 0.8 * cm,
+                        1.3 * cm,
+                        width=iw,
+                        height=ih,
+                        preserveAspectRatio=True,
+                        mask="auto",
+                    )
             except Exception as e:
                 c.setFont(font, 8)
                 c.drawString(W - 10 * cm, 2 * cm, f"[fig err: {e}]")

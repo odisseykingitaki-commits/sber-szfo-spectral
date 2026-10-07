@@ -1,4 +1,4 @@
-# Task 2 — pitch (12 слайдов)
+# Task 2 — pitch (11 слайдов)
 
 Отдельный артефакт от методологического отчёта.  
 Глубина таблиц и leakage — в `docs/TASK2_METHOD_REPORT.md`.  
@@ -63,21 +63,12 @@ Task 1 labels + окна → A: прогноз (12) → MAE-таблица
 
 ---
 
-## Слайд 5 — MAE: сельские vs городские
+## Слайд 5 — MAE: сетка и кто выигрывает
 
 **Обязательная метрика — MAE. Один взгляд на всю сетку.**
 
-- Сельские: seasonal / lgbm / naive / prophet по разным H  
-- Городские: Prophet доминирует на H=1,3,6; на H=12 — naive  
+- 8 ячеек (2 кластера × H=1/3/6/12) × ключевые модели  
 - H=12: LGBM/CatBoost пусты (мало точек после lag_12)
-
-**Рисунок:** `docs/presentation_assets_task2/slide05_mae_heatmap.png`
-
----
-
-## Слайд 6 — Кто выигрывает когда
-
-**Нет единого победителя. Есть карта режимов.**
 
 | Кластер | H | Победитель | MAE |
 |---------|--:|------------|----:|
@@ -90,27 +81,29 @@ Task 1 labels + окна → A: прогноз (12) → MAE-таблица
 | городские | 6 | **prophet** | 2040 |
 | городские | 12 | naive | 2525 |
 
-Prophet часто лучший на городских; ML превосходит его точечно (сельские H=3).
+**Takeaway:** Prophet часто лучший на городских; LGBM — точечно на сельских H=3; naive конкурентоспособен.
 
-**Рисунок:** `docs/presentation_assets_task2/slide06_winner_map.png`
+**Рисунок:** `docs/presentation_assets_task2/slide05_mae_grid.png`
 
 ---
 
-## Слайд 7 — Кейс: сельские H=3 — LGBM vs Prophet
+## Слайд 6 — Кейс: сельские H=3 — LGBM vs Prophet
 
-**Единственный ясный локальный выигрыш ML над Prophet**
+**Один локальный выигрыш, не универсальное превосходство**
 
-- LGBM MAE **1761** vs Prophet **1839** vs naive **3133**  
+- LGBM MAE **1761** vs Prophet **1839** → ≈ **4.2%** лучше \((1839-1761)/1839\)  
+- vs naive **3133** — существенный отрыв от базовой линии  
 - `lgbm_trends` = 1801 — Trends здесь **не** помогают  
+- Только эта клетка: на остальных **7** ячейках сильнее Prophet / naive / seasonal  
 - На городских H=3 картина обратная: Prophet **2653**, LGBM **5241**
 
 Тезис: «пытались превзойти Prophet» — да; «превзошли везде» — нет.
 
-**Рисунок:** `docs/presentation_assets_task2/slide07_rural_h3_case.png`
+**Рисунок:** `docs/presentation_assets_task2/slide06_rural_h3_case.png`
 
 ---
 
-## Слайд 8 — Changepoints: консенсус, не один метод
+## Слайд 7 — Changepoints: консенсус, не один метод
 
 **Девять алгоритмов. «Лучший» ответ — где сходятся ≥50%.**
 
@@ -118,11 +111,11 @@ Prophet часто лучший на городских; ML превосходи
 - Консенсус: **2023-11** (5/9), **2024-04** (5/9), **2024-09** (7/9)  
 - Не назначаем одному PELT/Binseg статус «истины»
 
-**Рисунок:** `docs/presentation_assets_task2/slide08_changepoint_consensus.png`
+**Рисунок:** `docs/presentation_assets_task2/slide07_changepoint_consensus.png`
 
 ---
 
-## Слайд 9 — Что видно вокруг сдвига 2024-09
+## Слайд 8 — Что видно вокруг сдвига 2024-09
 
 **Сдвиг спектрального режима — не выдуманный новостной сюжет**
 
@@ -130,11 +123,12 @@ Prophet часто лучший на городских; ML превосходи
 - PR₊: 4.303 → 4.267 → 4.162 (w15–w17); Frustration стабилен ≈ 0.5625  
 - Интерпретация: согласованный **структурный** сигнал; без привязки к заголовкам СМИ
 
-**Рисунок:** `docs/presentation_assets_task2/slide09_cp_example.png`
+**Рисунок:** `docs/presentation_assets_task2/slide08_cp_example.png`  
+**Мини-график:** `docs/presentation_assets_task2/slide_cp_pr_frust.png`
 
 ---
 
-## Слайд 10 — Trends — proxy, не news
+## Слайд 9 — Trends — proxy, не news
 
 **Критерий новостей не закрыт**
 
@@ -142,11 +136,11 @@ Prophet часто лучший на городских; ML превосходи
 - Сделано: среднее по регионам СЗФО → merge по дате  
 - Ограничение: один ряд на оба кластера; после фикса часто хуже no-trends
 
-**Рисунок:** `docs/presentation_assets_task2/slide10_trends_not_news.png`
+**Рисунок:** `docs/presentation_assets_task2/slide09_trends_not_news.png`
 
 ---
 
-## Слайд 11 — Foundation + news
+## Слайд 10 — Foundation + news
 
 **Chronos-bolt-tiny zero-shot прогнан; news — пробел**
 
@@ -154,11 +148,11 @@ Prophet часто лучший на городских; ML превосходи
 - Формулировка: **«прогон есть; на ~24 точках выигрыша по MAE нет»**  
 - News NLP не реализован; Google Trends — proxy
 
-**Рисунок:** `docs/presentation_assets_task2/slide11_gaps.png`
+**Рисунок:** `docs/presentation_assets_task2/slide10_gaps.png`
 
 ---
 
-## Слайд 12 — Takeaways
+## Слайд 11 — Takeaways
 
 **Итог задачи 2**
 
@@ -170,4 +164,4 @@ Prophet часто лучший на городских; ML превосходи
 
 Полный метод → `docs/TASK2_METHOD_REPORT.md` · пробелы → `docs/TASK2_GAPS.md`
 
-**Рисунок:** `docs/presentation_assets_task2/slide12_takeaways.png`
+**Рисунок:** `docs/presentation_assets_task2/slide11_takeaways.png`

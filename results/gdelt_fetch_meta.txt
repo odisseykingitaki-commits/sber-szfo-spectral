@@ -1,0 +1,8 @@
+ok_days=95
+fail_days=1
+fail_list=['2023-03-22']
+out=data\processed\gdelt_news_monthly.csv
+geo_scope=russia_wide (NWFD filter via FullName; total_nwfd_events=84)
+sample_days=[1, 8, 15, 22]
+period=2023-01..2024-12
+source=gdelt python package v2 events (daily files, sampled days)

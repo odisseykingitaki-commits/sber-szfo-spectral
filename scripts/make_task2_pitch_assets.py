@@ -13,7 +13,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+from matplotlib.patches import FancyBboxPatch
 import numpy as np
 import pandas as pd
 
@@ -53,7 +53,7 @@ def _save(fig, name: str):
     path = OUT / name
     fig.savefig(path, dpi=160, bbox_inches="tight", facecolor=C_BG)
     plt.close(fig)
-    print(f"  → {path.name}")
+    print(f"  -> {path.name}")
     return path
 
 
@@ -65,7 +65,6 @@ def load_data():
         "naive", "seasonal", "mean", "prophet",
         "lgbm", "lgbm_trends", "catboost", "catboost_trends",
     ]
-    mae_cols = [f"MAE_{m}" for m in models]
     winners = []
     for _, row in fc.iterrows():
         best_m, best_v = None, np.inf
@@ -82,7 +81,7 @@ def load_data():
         })
     return {
         "fc": fc, "cons": cons, "dyn": dyn,
-        "models": models, "mae_cols": mae_cols, "winners": winners,
+        "models": models, "winners": winners,
     }
 
 
@@ -195,10 +194,16 @@ def slide04_leakage(d):
     return _save(fig, "slide04_leakage_note.png")
 
 
-def slide05_mae_heatmap(d):
+def slide05_mae_grid(d):
+    """Merged former slides 5+6: MAE heatmap + winner chips + takeaway."""
     fc = d["fc"]
+    winners = d["winners"]
     models = ["naive", "seasonal", "prophet", "lgbm", "lgbm_trends", "catboost"]
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5.8))
+    fig = plt.figure(figsize=(12, 7.2))
+    gs = fig.add_gridspec(2, 2, height_ratios=[3.2, 1.1], hspace=0.35, wspace=0.25)
+    axes = [fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])]
+    ax_take = fig.add_subplot(gs[1, :])
+
     for ax, cl, title in [(axes[0], 0, "Сельские"), (axes[1], 1, "Городские")]:
         sub = fc[fc["cluster"] == cl].sort_values("horizon")
         mat = []
@@ -207,7 +212,7 @@ def slide05_mae_heatmap(d):
         mat = np.array(mat, dtype=float)
         im = ax.imshow(mat, aspect="auto", cmap="YlOrRd")
         ax.set_xticks(range(len(models)))
-        ax.set_xticklabels(models, rotation=35, ha="right", fontsize=9)
+        ax.set_xticklabels(models, rotation=35, ha="right", fontsize=8)
         ax.set_yticks(range(len(sub)))
         ax.set_yticklabels([f"H={int(h)}" for h in sub["horizon"]], fontsize=10)
         ax.set_title(title, color=C_ACCENT)
@@ -215,80 +220,63 @@ def slide05_mae_heatmap(d):
             for j in range(mat.shape[1]):
                 v = mat[i, j]
                 txt = "—" if np.isnan(v) else f"{v:.0f}"
-                ax.text(j, i, txt, ha="center", va="center", fontsize=8,
+                ax.text(j, i, txt, ha="center", va="center", fontsize=7.5,
                         color="black" if np.isnan(v) or v < np.nanmax(mat) * 0.65 else "white")
+        # winner labels on y-side
+        win_map = {w["H"]: w for w in winners if w["cluster"] == cl}
+        for i, h in enumerate(sub["horizon"]):
+            w = win_map.get(int(h))
+            if w:
+                ax.text(len(models) - 0.05, i, f" ← {w['winner']}",
+                        ha="left", va="center", fontsize=7.5, color=C_ACCENT)
         fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    fig.suptitle("MAE по моделям × горизонтам (post-leakage)", color=C_ACCENT)
-    fig.tight_layout()
-    return _save(fig, "slide05_mae_heatmap.png")
+
+    ax_take.set_xlim(0, 1)
+    ax_take.set_ylim(0, 1)
+    ax_take.axis("off")
+    ax_take.add_patch(FancyBboxPatch((0.02, 0.15), 0.96, 0.7,
+                                     boxstyle="round,pad=0.02",
+                                     facecolor=C_CARD, edgecolor=C_ACCENT, linewidth=1.5))
+    ax_take.text(0.5, 0.55,
+                 "Prophet часто лучший на городских; LGBM — точечно на сельских H=3;\n"
+                 "naive конкурентоспособен",
+                 ha="center", va="center", fontsize=12, color=C_INK, linespacing=1.4)
+    fig.suptitle("MAE: сетка моделей × горизонтов (post-leakage)", color=C_ACCENT, fontsize=14)
+    return _save(fig, "slide05_mae_grid.png")
 
 
-def slide06_winner_map(d):
-    winners = d["winners"]
-    # grid: rows = clusters, cols = horizons
-    Hs = [1, 3, 6, 12]
-    names = {0: "сельские", 1: "городские"}
-    color_map = {
-        "prophet": C_ACCENT, "lgbm": C_TEAL, "naive": C_CORAL,
-        "seasonal": C_GOLD, "mean": C_MUTED, "catboost": "#5c6bc0",
-        "lgbm_trends": "#4db6ac", "catboost_trends": "#7986cb",
-    }
-    fig, ax = plt.subplots(figsize=(11, 5.5))
-    ax.set_xlim(-0.5, 3.5)
-    ax.set_ylim(-0.5, 1.5)
-    ax.set_xticks(range(4))
-    ax.set_xticklabels([f"H={h}" for h in Hs])
-    ax.set_yticks([0, 1])
-    ax.set_yticklabels(["сельские", "городские"])
-    ax.set_title("Карта победителей (min MAE)", color=C_ACCENT)
-    for w in winners:
-        xi = Hs.index(w["H"])
-        yi = w["cluster"]
-        col = color_map.get(w["winner"], C_MUTED)
-        ax.add_patch(FancyBboxPatch((xi - 0.4, yi - 0.35), 0.8, 0.7,
-                                    boxstyle="round,pad=0.02",
-                                    facecolor=col, edgecolor="white", linewidth=1,
-                                    alpha=0.9))
-        ax.text(xi, yi + 0.05, w["winner"], ha="center", va="center",
-                fontsize=11, fontweight="bold", color="white")
-        ax.text(xi, yi - 0.18, f"{w['MAE']:.0f}", ha="center", va="center",
-                fontsize=9, color="white")
-    ax.set_aspect("equal")
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-    # legend
-    handles = [mpatches.Patch(color=c, label=m) for m, c in
-               [("prophet", C_ACCENT), ("lgbm", C_TEAL), ("naive", C_CORAL), ("seasonal", C_GOLD)]]
-    ax.legend(handles=handles, loc="upper right", frameon=False, fontsize=9)
-    return _save(fig, "slide06_winner_map.png")
-
-
-def slide07_rural_h3(d):
+def slide06_rural_h3(d):
     fc = d["fc"]
     row = fc[(fc["cluster"] == 0) & (fc["horizon"] == 3)].iloc[0]
     models = ["naive", "seasonal", "prophet", "lgbm", "lgbm_trends", "catboost"]
     vals = [row[f"MAE_{m}"] for m in models]
     colors = [C_MUTED, C_GOLD, C_ACCENT, C_TEAL, "#4db6ac", "#5c6bc0"]
+    lgbm, prophet, naive = float(row["MAE_lgbm"]), float(row["MAE_prophet"]), float(row["MAE_naive"])
+    pct = (prophet - lgbm) / prophet * 100
     fig, ax = plt.subplots(figsize=(10, 5.5))
     bars = ax.bar(models, vals, color=colors, edgecolor="white", width=0.7)
-    # highlight winner
     bars[3].set_edgecolor(C_TEAL)
     bars[3].set_linewidth(2.5)
     ax.set_ylabel("MAE")
-    ax.set_title("Кейс: сельские · H=3 — LGBM vs Prophet", color=C_ACCENT)
+    ax.set_title("Кейс: сельские · H=3 — один локальный выигрыш LGBM", color=C_ACCENT)
     for b, v in zip(bars, vals):
         ax.text(b.get_x() + b.get_width() / 2, v + 40, f"{v:.0f}",
                 ha="center", fontsize=10, color=C_INK)
-    ax.axhline(row["MAE_prophet"], color=C_ACCENT, ls="--", alpha=0.5, label="Prophet")
+    ax.axhline(prophet, color=C_ACCENT, ls="--", alpha=0.5, label="Prophet")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.text(0.98, 0.95, "LGBM 1761 < Prophet 1839\nTrends не помогают",
-            transform=ax.transAxes, ha="right", va="top", fontsize=10,
+    ax.text(0.98, 0.95,
+            f"LGBM {lgbm:.0f} vs Prophet {prophet:.0f}\n"
+            f"≈ {pct:.1f}% лучше\n"
+            f"vs naive {naive:.0f}\n"
+            "не универсальное превосходство\n"
+            "(на 7 других клетках — нет)",
+            transform=ax.transAxes, ha="right", va="top", fontsize=9.5,
             color=C_TEAL, linespacing=1.3)
-    return _save(fig, "slide07_rural_h3_case.png")
+    return _save(fig, "slide06_rural_h3_case.png")
 
 
-def slide08_consensus(d):
+def slide07_consensus(d):
     cons = d["cons"].sort_values("count", ascending=True)
     fig, ax = plt.subplots(figsize=(10, 5.8))
     colors = [C_TEAL if bool(r.consensus) else C_MUTED for _, r in cons.iterrows()]
@@ -301,11 +289,36 @@ def slide08_consensus(d):
     for y, (_, r) in enumerate(cons.iterrows()):
         ax.text(r["count"] + 0.1, y, f"{r['count']}/9", va="center", fontsize=10)
     ax.legend(frameon=False)
-    return _save(fig, "slide08_changepoint_consensus.png")
+    return _save(fig, "slide07_changepoint_consensus.png")
 
 
-def slide09_cp_example(d):
-    # PR+ / Frustration around 2024-09 consensus
+def slide_cp_pr_frust(d):
+    """Mini-chart: PR₊ and Frustration for windows 15–17 around 2024-09."""
+    windows = d["dyn"]["windows"]
+    sel = [w for w in windows if w["window"] in (15, 16, 17)]
+    xs = [f"w{w['window']}\n{w['end'][:7]}" for w in sel]
+    pr = [w["PR_plus"] for w in sel]
+    fr = [w["frustration"] for w in sel]
+    fig, ax1 = plt.subplots(figsize=(5.5, 3.4))
+    ax2 = ax1.twinx()
+    ax1.plot(xs, pr, "o-", color=C_TEAL, lw=2.2, markersize=9, label="PR₊")
+    ax2.plot(xs, fr, "s--", color=C_CORAL, lw=1.6, markersize=8, label="Frustration")
+    for i, (p, f) in enumerate(zip(pr, fr)):
+        ax1.text(i, p + 0.012, f"{p:.3f}", ha="center", fontsize=8, color=C_TEAL)
+    ax1.set_ylabel("PR₊", color=C_TEAL, fontsize=10)
+    ax2.set_ylabel("Frustration", color=C_CORAL, fontsize=10)
+    ax2.set_ylim(0.5, 0.65)
+    ax1.set_title("w15–w17 · PR₊ ↓, Frust ≈ 0.5625", color=C_ACCENT, fontsize=11)
+    ax1.axvline(1, color=C_ACCENT, ls=":", lw=1.5, alpha=0.7)
+    ax1.spines["top"].set_visible(False)
+    lines1, lab1 = ax1.get_legend_handles_labels()
+    lines2, lab2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, lab1 + lab2, loc="upper right", frameon=False, fontsize=8)
+    fig.tight_layout()
+    return _save(fig, "slide_cp_pr_frust.png")
+
+
+def slide08_cp_example(d):
     windows = d["dyn"]["windows"]
     sel = [w for w in windows if w["window"] in range(14, 19)]
     xs = [w["end"][:7] for w in sel]
@@ -315,7 +328,6 @@ def slide09_cp_example(d):
     ax2 = ax1.twinx()
     ax1.plot(xs, pr, "o-", color=C_TEAL, lw=2, markersize=8, label="PR₊")
     ax2.plot(xs, fr, "s--", color=C_CORAL, lw=1.5, markersize=7, label="Frustration")
-    # mark consensus date
     if "2024-09" in xs:
         i = xs.index("2024-09")
         ax1.axvline(i, color=C_ACCENT, ls=":", lw=2, alpha=0.8)
@@ -330,14 +342,15 @@ def slide09_cp_example(d):
     lines2, lab2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, lab1 + lab2, loc="lower left", frameon=False)
     ax1.text(0.02, 0.98,
-             "Структурный сигнал спектра, не новостной заголовок",
-             transform=ax1.transAxes, va="top", fontsize=9, color=C_MUTED)
-    return _save(fig, "slide09_cp_example.png")
+             "Структурный сигнал спектра, не новостной заголовок\n"
+             "PR₊: 4.303 → 4.267 → 4.162 · Frust ≈ 0.5625",
+             transform=ax1.transAxes, va="top", fontsize=9, color=C_MUTED,
+             linespacing=1.3)
+    return _save(fig, "slide08_cp_example.png")
 
 
-def slide10_trends(d):
+def slide09_trends(d):
     fc = d["fc"]
-    # compare lgbm vs lgbm_trends where both exist
     pairs = []
     for _, row in fc.iterrows():
         a, b = row.get("MAE_lgbm"), row.get("MAE_lgbm_trends")
@@ -360,10 +373,10 @@ def slide10_trends(d):
     ax.spines["right"].set_visible(False)
     ax.text(0.98, 0.95, "News NLP не строили\n→ критерий 15% = gap",
             transform=ax.transAxes, ha="right", va="top", fontsize=10, color=C_MUTED)
-    return _save(fig, "slide10_trends_not_news.png")
+    return _save(fig, "slide09_trends_not_news.png")
 
 
-def slide11_gaps(d):
+def slide10_gaps(d):
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -371,13 +384,13 @@ def slide11_gaps(d):
     ax.set_title("Пробелы критериев (честно)", color=C_ACCENT, pad=12)
     items = [
         (0.08, 0.55, "Foundation TS (15%)",
-         "Chronos / TimesFM / MOIRAI\nне использовали\nряд ~24 точки\n«преимущество не закрыто»", C_CORAL),
+         "Chronos-bolt-tiny\nпрогнан zero-shot\nMAE хуже baselines\nна всех 8 ячейках", C_CORAL),
         (0.52, 0.55, "News (15%)",
-         "Есть Google Trends\n(прокси интереса)\nНет NLP новостей\npipeline = future work", C_GOLD),
+         "Есть Google Trends\n(прокси интереса)\nGDELT — см. GAPS\nбез narrative win", C_GOLD),
         (0.08, 0.08, "Закрыто",
          "Метод · MAE · сравнение\nпрогнозов · CP-консенсус\nвоспроизводимость 12/13", C_TEAL),
         (0.52, 0.08, "Next steps",
-         "zero-shot foundation\nв той же MAE-таблице\nnews: дата+лаг+no leak", C_ACCENT),
+         "news calendar + lag\nanti-leakage join\nA/B vs Trends", C_ACCENT),
     ]
     for x, y, title, body, col in items:
         ax.add_patch(FancyBboxPatch((x, y), 0.40, 0.38,
@@ -387,10 +400,10 @@ def slide11_gaps(d):
                 fontweight="bold", color=col)
         ax.text(x + 0.20, y + 0.12, body, ha="center", va="center",
                 fontsize=10, color=C_INK, linespacing=1.35)
-    return _save(fig, "slide11_gaps.png")
+    return _save(fig, "slide10_gaps.png")
 
 
-def slide12_takeaways(d):
+def slide11_takeaways(d):
     fig, ax = plt.subplots(figsize=(11, 6.2))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -404,12 +417,12 @@ def slide12_takeaways(d):
         "1. Два уровня: прогноз расходов + консенсус changepoints",
         "2. Post-leakage: нет единого winner (Prophet / LGBM / naive / seasonal)",
         "3. Консенсус сдвигов: 2023-11 · 2024-04 · 2024-09",
-        "4. Trends ≠ news; foundation models — документированный gap",
+        "4. Trends ≠ news; Chronos прогнан без выигрыша MAE",
         "5. Воспроизведение: src/12, src/13 · configs/task2_*.yaml",
     ]
     for i, t in enumerate(points):
         ax.text(0.12, 0.68 - i * 0.11, t, ha="left", fontsize=12, color=C_INK)
-    return _save(fig, "slide12_takeaways.png")
+    return _save(fig, "slide11_takeaways.png")
 
 
 def main():
@@ -421,14 +434,14 @@ def main():
     slide02_two_levels(d)
     slide03_architecture(d)
     slide04_leakage(d)
-    slide05_mae_heatmap(d)
-    slide06_winner_map(d)
-    slide07_rural_h3(d)
-    slide08_consensus(d)
-    slide09_cp_example(d)
-    slide10_trends(d)
-    slide11_gaps(d)
-    slide12_takeaways(d)
+    slide05_mae_grid(d)
+    slide06_rural_h3(d)
+    slide07_consensus(d)
+    slide_cp_pr_frust(d)
+    slide08_cp_example(d)
+    slide09_trends(d)
+    slide10_gaps(d)
+    slide11_takeaways(d)
     print(f"Done → {OUT}")
 
 
