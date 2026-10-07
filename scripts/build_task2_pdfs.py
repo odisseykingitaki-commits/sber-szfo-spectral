@@ -24,19 +24,16 @@ MD_SLIDES = DOCS / "TASK2_slides.md"
 
 SLIDE_ASSETS = [
     ASSETS / "slide01_title_card.png",
-    ASSETS / "slide02_two_levels.png",
+    ASSETS / "slide02_idea.png",
     ASSETS / "slide03_architecture.png",
-    ASSETS / "slide04_leakage_note.png",
-    ASSETS / "slide05_mae_grid.png",
-    ASSETS / "slide06_rural_h3_case.png",
-    ASSETS / "slide07_changepoint_consensus.png",
-    ASSETS / "slide08_cp_example.png",          # slide 8 also embeds mini-chart below
-    ASSETS / "slide09_trends_not_news.png",
-    ASSETS / "slide10_gaps.png",
-    ASSETS / "slide11_takeaways.png",
+    ASSETS / "slide04_leakage.png",
+    ASSETS / "slide05_mae_winners.png",
+    ASSETS / "slide06_rural_h3.png",
+    ASSETS / "slide07_changepoints.png",
+    ASSETS / "slide08_external.png",
+    ASSETS / "slide09_chronos.png",
+    ASSETS / "slide10_final.png",
 ]
-# Extra mini-chart for changepoint 2024-09 slide (embedded beside main fig when present)
-SLIDE_CP_MINI = ASSETS / "slide_cp_pr_frust.png"
 
 
 def _find_font_paths():
@@ -370,9 +367,9 @@ def build_report_pdf():
 
     # append key pitch figures at end if present
     for name in [
-        "slide05_mae_heatmap.png",
-        "slide06_winner_map.png",
-        "slide08_changepoint_consensus.png",
+        "slide04_leakage.png",
+        "slide05_mae_winners.png",
+        "slide07_changepoints.png",
         "slide03_architecture.png",
     ]:
         p = ASSETS / name
@@ -437,35 +434,48 @@ def build_slides_pdf():
             f"Task 2 · {i + 1}/{len(slides)} · репозиторий: локально, публикация — после конкурса",
         )
 
-        y = H - 2.2 * cm
-        c.setFillColor(colors.HexColor("#222222"))
-        max_text_w = W - 2.4 * cm
+        # Visual-first pitch: PNG carries the message; short bullets on the left.
         fig = SLIDE_ASSETS[i] if i < len(SLIDE_ASSETS) else None
         show_fig = bool(fig and fig.exists())
         last_i = len(slides) - 1
-        if show_fig and i in (0, last_i):
-            max_text_w = W * 0.42
+        # Figure-dominant for title / idea / leakage / winners / CP / final
+        fig_heavy = i in (0, 1, 3, 4, 6, last_i)
+
+        y = H - 2.2 * cm
+        c.setFillColor(colors.HexColor("#222222"))
+        if show_fig and fig_heavy:
+            max_text_w = W * 0.34
         elif show_fig:
-            max_text_w = W * 0.48
+            max_text_w = W * 0.42
+        else:
+            max_text_w = W - 2.4 * cm
 
         for ln in body_lines:
             if not ln.strip():
-                y -= 0.25 * cm
+                y -= 0.22 * cm
                 continue
             if "presentation_assets" in ln or "figures/" in ln or ln.strip().startswith("**Рисунок"):
                 continue
+            if ln.strip().startswith("```") or ln.strip() == "```":
+                continue
             if ln.strip().startswith("|"):
+                # winners table lives in PNG — skip ascii table on figure-heavy slides
+                if fig_heavy:
+                    continue
                 row = _strip_md(ln.strip())
-                c.setFont(font, 8.5)
-                c.drawString(1.2 * cm, y, row[:115])
-                y -= 0.42 * cm
+                c.setFont(font, 8.0)
+                c.drawString(1.2 * cm, y, row[:90])
+                y -= 0.38 * cm
                 if y < 1.5 * cm:
                     break
                 continue
             text = _strip_md(ln.strip())
             if text.startswith("- "):
                 text = "• " + text[2:]
-            size = 13 if i == 0 else 10.5
+            # Skip long headline duplicate already in PNG for figure-heavy slides
+            if fig_heavy and not text.startswith("•") and len(text) > 40 and i != 0:
+                continue
+            size = 12 if i == 0 else 10
             use_bold = i == 0 and not text.startswith("•")
             c.setFont(font_b if use_bold else font, size)
             words = text.split()
@@ -476,52 +486,40 @@ def build_slides_pdf():
                     line = trial
                 else:
                     c.drawString(1.2 * cm, y, line)
-                    y -= 0.52 * cm
+                    y -= 0.48 * cm
                     line = w
                     if y < 1.5 * cm:
                         break
             if line and y >= 1.5 * cm:
                 c.drawString(1.2 * cm, y, line)
-                y -= 0.52 * cm
+                y -= 0.48 * cm
             if y < 1.5 * cm:
                 break
 
         if show_fig:
             try:
                 from reportlab.lib.utils import ImageReader
-                # Slide 8 (0-based index 7): main CP chart + mini PR₊/Frustration
-                if i == 7 and SLIDE_CP_MINI.exists():
-                    iw, ih = 9.0 * cm, 5.8 * cm
-                    c.drawImage(
-                        ImageReader(str(fig)),
-                        W - iw - 0.8 * cm,
-                        3.6 * cm,
-                        width=iw,
-                        height=ih,
-                        preserveAspectRatio=True,
-                        mask="auto",
-                    )
-                    mw, mh = 7.0 * cm, 3.2 * cm
-                    c.drawImage(
-                        ImageReader(str(SLIDE_CP_MINI)),
-                        W - mw - 1.5 * cm,
-                        0.9 * cm,
-                        width=mw,
-                        height=mh,
-                        preserveAspectRatio=True,
-                        mask="auto",
-                    )
+                if fig_heavy:
+                    iw, ih = 16.5 * cm, 9.2 * cm
+                    x_img = W - iw - 0.5 * cm
+                    y_img = 1.0 * cm
+                elif i in (0, last_i):
+                    iw, ih = 12.0 * cm, 7.4 * cm
+                    x_img = W - iw - 0.7 * cm
+                    y_img = 1.2 * cm
                 else:
-                    iw, ih = (11.5 * cm, 7.2 * cm) if i in (0, last_i) else (10.0 * cm, 7.0 * cm)
-                    c.drawImage(
-                        ImageReader(str(fig)),
-                        W - iw - 0.8 * cm,
-                        1.3 * cm,
-                        width=iw,
-                        height=ih,
-                        preserveAspectRatio=True,
-                        mask="auto",
-                    )
+                    iw, ih = 11.2 * cm, 7.2 * cm
+                    x_img = W - iw - 0.7 * cm
+                    y_img = 1.2 * cm
+                c.drawImage(
+                    ImageReader(str(fig)),
+                    x_img,
+                    y_img,
+                    width=iw,
+                    height=ih,
+                    preserveAspectRatio=True,
+                    mask="auto",
+                )
             except Exception as e:
                 c.setFont(font, 8)
                 c.drawString(W - 10 * cm, 2 * cm, f"[fig err: {e}]")
