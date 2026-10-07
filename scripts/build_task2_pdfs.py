@@ -4,7 +4,8 @@
     python scripts/build_task2_pdfs.py
 
 Требует: reportlab, Pillow. Шрифты Windows (Arial) для кириллицы.
-Аналог scripts/build_task1_pdfs.py.
+Перед сборкой желательно:
+    python scripts/make_task2_pitch_assets.py
 """
 from __future__ import annotations
 
@@ -20,10 +21,6 @@ OUT_REPORT = DOCS / "TASK2_method_report.pdf"
 OUT_SLIDES = DOCS / "TASK2_presentation.pdf"
 MD_REPORT = DOCS / "TASK2_METHOD_REPORT.md"
 MD_SLIDES = DOCS / "TASK2_slides.md"
-
-FIG_NAMES = [
-    "fig_changepoints_consensus.png",
-]
 
 SLIDE_ASSETS = [
     ASSETS / "slide01_title_card.png",
@@ -80,6 +77,7 @@ def _strip_md(text: str) -> str:
     text = text.replace(r"\[", "").replace(r"\]", "")
     text = text.replace(r"\approx", "≈")
     text = text.replace(r"\lambda", "λ")
+    text = text.replace(r"\Sigma", "Σ")
     text = text.replace("$", "")
     text = text.replace("&lt;", "<").replace("&gt;", ">")
     return text
@@ -142,7 +140,7 @@ def build_report_pdf():
         textColor=colors.HexColor("#444444"), spaceAfter=3,
     ))
     styles.add(ParagraphStyle(
-        name="CodeR", fontName=font, fontSize=7.5, leading=9.5,
+        name="CodeR", fontName=font, fontSize=8, leading=10,
         backColor=colors.HexColor("#f4f4f4"), leftIndent=6, spaceAfter=6,
     ))
     styles.add(ParagraphStyle(
@@ -274,26 +272,28 @@ def build_report_pdf():
             story.append(Paragraph(_strip_md(line.lstrip()), styles["BulletR"]))
             continue
 
-        style = styles["MetaR"] if line.startswith("**") and (
-            "Конкурс" in line or "Репозиторий" in line or "Воспроизведение" in line
-            or "Объект" in line or "Два уровня" in line
-        ) else styles["BodyR"]
+        style = styles["MetaR"] if line.startswith("**") and ":" in line[:40] else styles["BodyR"]
         story.append(Paragraph(_strip_md(line), style))
 
     flush_table()
     flush_code()
 
-    # append changepoint figure if present
-    for name in FIG_NAMES:
-        p = FIGURES / name
+    # append key pitch figures at end if present
+    for name in [
+        "slide05_mae_heatmap.png",
+        "slide06_winner_map.png",
+        "slide08_changepoint_consensus.png",
+        "slide03_architecture.png",
+    ]:
+        p = ASSETS / name
         if p.exists():
             iw = doc.width
-            img = Image(str(p), width=iw, height=iw * 0.5)
+            img = Image(str(p), width=iw, height=iw * 0.52)
             img.hAlign = "CENTER"
             story.append(Spacer(1, 8))
             story.append(KeepTogether([
                 img,
-                Paragraph(f"Рис. {name}", styles["CaptionR"]),
+                Paragraph(name, styles["CaptionR"]),
             ]))
 
     doc.build(story)
@@ -356,26 +356,26 @@ def build_slides_pdf():
         if show_fig and i in (0, last_i):
             max_text_w = W * 0.42
         elif show_fig:
-            max_text_w = W * 0.50
+            max_text_w = W * 0.48
 
         for ln in body_lines:
             if not ln.strip():
                 y -= 0.25 * cm
                 continue
-            if "presentation_assets_task2/" in ln or "figures/" in ln or ln.strip().startswith("**Рисунок"):
+            if "presentation_assets" in ln or "figures/" in ln or ln.strip().startswith("**Рисунок"):
                 continue
             if ln.strip().startswith("|"):
                 row = _strip_md(ln.strip())
-                c.setFont(font, 9)
-                c.drawString(1.2 * cm, y, row[:110])
-                y -= 0.45 * cm
+                c.setFont(font, 8.5)
+                c.drawString(1.2 * cm, y, row[:115])
+                y -= 0.42 * cm
                 if y < 1.5 * cm:
                     break
                 continue
             text = _strip_md(ln.strip())
             if text.startswith("- "):
                 text = "• " + text[2:]
-            size = 13 if i == 0 else 11
+            size = 13 if i == 0 else 10.5
             use_bold = i == 0 and not text.startswith("•")
             c.setFont(font_b if use_bold else font, size)
             words = text.split()
@@ -386,20 +386,20 @@ def build_slides_pdf():
                     line = trial
                 else:
                     c.drawString(1.2 * cm, y, line)
-                    y -= 0.55 * cm
+                    y -= 0.52 * cm
                     line = w
                     if y < 1.5 * cm:
                         break
             if line and y >= 1.5 * cm:
                 c.drawString(1.2 * cm, y, line)
-                y -= 0.55 * cm
+                y -= 0.52 * cm
             if y < 1.5 * cm:
                 break
 
         if show_fig:
             try:
                 from reportlab.lib.utils import ImageReader
-                iw, ih = (11.5 * cm, 7.2 * cm) if i in (0, last_i) else (9.8 * cm, 7.0 * cm)
+                iw, ih = (11.5 * cm, 7.2 * cm) if i in (0, last_i) else (10.0 * cm, 7.0 * cm)
                 c.drawImage(
                     ImageReader(str(fig)),
                     W - iw - 0.8 * cm,
