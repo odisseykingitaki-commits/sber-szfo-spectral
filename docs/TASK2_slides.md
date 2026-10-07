@@ -142,11 +142,11 @@ Task 1 labels + окна → A: прогноз (12) → MAE-таблица
 
 ## Слайд 10 — Foundation + news
 
-**Chronos-bolt-tiny zero-shot прогнан; news — пробел**
+**Chronos-bolt-tiny zero-shot прогнан; GDELT — попытка без win**
 
 - 8 ячеек H×cluster: Chronos **хуже** Prophet / LGBM / naive везде (`forecast_foundation.csv`)  
 - Формулировка: **«прогон есть; на ~24 точках выигрыша по MAE нет»**  
-- News NLP не реализован; Google Trends — proxy
+- GDELT events: пробовали (Russia-wide); систематического win нет; городские H=1 ≈ −5.6%. NLP по текстам — нет; Trends — proxy
 
 **Рисунок:** `docs/presentation_assets_task2/slide10_gaps.png`
 
