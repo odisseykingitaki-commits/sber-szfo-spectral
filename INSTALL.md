@@ -2,6 +2,10 @@
 
 Аудитория: ML-инженеры / проверяющие. Цель — поднять окружение и прогнать пайплайн без сюрпризов.
 
+> **Task 2:** прогноз расходов по спектральным кластерам + changepoints.  
+> Канон метрик: `results/forecast_all_models.csv` (после фикса `end_dt < ds`).  
+> Пакет документов: `docs/TASK2_METHOD_REPORT.md`, `docs/TASK2_slides.md`, PDF в `docs/`.
+
 ## 1. Окружение
 
 ```bash
@@ -84,15 +88,70 @@ python 10_robustness.py
 | `figures/fig_dynamic.png` | `07_dynamics.py` |
 | `figures/fig_bootstrap.png` | `09_bootstrap.py` |
 | `figures/fig_final.png` | `10_robustness.py` |
+| `figures/fig_changepoints_consensus.png` | `13_changepoints.py` |
 
-Пересобрать PDF метод-отчёта и презентации:
+Пересобрать PDF метод-отчёта и презентации **Task 1**:
 
 ```bash
-python scripts/build_method_pdf.py
-python scripts/build_slides_pdf.py
+python scripts/make_pitch_assets.py      # PNG → docs/presentation_assets/
+python scripts/build_task1_pdfs.py       # или build_method_pdf / build_slides_pdf
 ```
 
 Выход: `docs/TASK1_method_report.pdf`, `docs/TASK1_presentation.pdf`.
+
+## 4b. Task 2 — прогноз и changepoints
+
+### Зависимости (уже в `requirements.txt`)
+
+| Пакет | Назначение |
+|-------|------------|
+| `prophet` (+ `cmdstanpy`, `holidays`) | baseline / сильный классический прогноз |
+| `lightgbm` | ML-прогноз + спектральные фичи (± Trends) |
+| `catboost` | ML-прогноз (сравнение с LGBM) |
+| `ruptures` | 9 методов поиска структурных сдвигов |
+| `pytrends` | выгрузка Google Trends (если нужно пересобрать CSV) |
+
+```bash
+conda activate sber
+pip install -r requirements.txt
+# PDF-пакет Task 2:
+pip install reportlab pillow pyyaml
+```
+
+Конфиги жюри: `configs/task2_config.yaml`, `configs/task2_methods.yaml`.
+
+### Только Task 2 (нужны артефакты Task 1)
+
+Сначала должны существовать:
+
+- `results/labels_threshold.npy` (кластеры 0/1)
+- `results/dynamic_summary.json` (скользящие окна → спектральный сигнал)
+- `data/intermediate/spend.parquet`
+- опционально `data/processed/google_trends_szfo.csv`
+
+```bash
+cd src
+python 12_timeseries.py    # → results/forecast_all_models.csv
+python 13_changepoints.py  # → changepoints_*.csv, figures/fig_changepoints_consensus.png
+```
+
+**Правило анти-утечки (обязательно):** спектральные признаки только из окон с `end_dt < ds`  
+(в коде: `mask = spectral['end_dt'] < row['ds']`). Старые черновики `forecast_metrics*.csv` — **игнорировать**.
+
+### PDF и pitch-ассеты Task 2
+
+```bash
+python scripts/make_task2_pitch_assets.py   # PNG → docs/presentation_assets_task2/
+python scripts/build_task2_pdfs.py          # PDF отчёт + презентация
+```
+
+Выход:
+
+- `docs/TASK2_method_report.pdf`
+- `docs/TASK2_presentation.pdf`
+- `docs/TASK2_METHOD_REPORT.md`, `docs/TASK2_slides.md`, `docs/TASK2_GAPS.md`
+
+Честные пробелы критериев (foundation models, news): см. `docs/TASK2_GAPS.md`.
 
 ## 5. Git / GitHub
 
