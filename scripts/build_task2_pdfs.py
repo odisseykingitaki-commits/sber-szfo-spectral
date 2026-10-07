@@ -22,17 +22,18 @@ OUT_SLIDES = DOCS / "TASK2_presentation.pdf"
 MD_REPORT = DOCS / "TASK2_METHOD_REPORT.md"
 MD_SLIDES = DOCS / "TASK2_slides.md"
 
+# Lean DeepSeek/user deck (9 slides). Architecture folded into idea;
+# MAE grid skipped (winners table only); CP consensus + PR₊ on one slide.
 SLIDE_ASSETS = [
-    ASSETS / "slide01_title_card.png",
+    ASSETS / "slide01_title_hook.png",
     ASSETS / "slide02_idea.png",
-    ASSETS / "slide03_architecture.png",
-    ASSETS / "slide04_leakage.png",
-    ASSETS / "slide05_mae_winners.png",
-    ASSETS / "slide06_rural_h3.png",
-    ASSETS / "slide07_changepoints.png",
-    ASSETS / "slide08_external.png",
-    ASSETS / "slide09_chronos.png",
-    ASSETS / "slide10_final.png",
+    ASSETS / "slide03_leakage.png",
+    ASSETS / "slide04_mae_winners.png",
+    ASSETS / "slide05_rural_h3.png",
+    ASSETS / "slide06_changepoints.png",
+    ASSETS / "slide07_external.png",
+    ASSETS / "slide08_chronos.png",
+    ASSETS / "slide09_final.png",
 ]
 
 
@@ -367,10 +368,10 @@ def build_report_pdf():
 
     # append key pitch figures at end if present
     for name in [
-        "slide04_leakage.png",
-        "slide05_mae_winners.png",
-        "slide07_changepoints.png",
-        "slide03_architecture.png",
+        "slide03_leakage.png",
+        "slide04_mae_winners.png",
+        "slide06_changepoints.png",
+        "slide02_idea.png",
     ]:
         p = ASSETS / name
         if p.exists():
@@ -438,8 +439,8 @@ def build_slides_pdf():
         fig = SLIDE_ASSETS[i] if i < len(SLIDE_ASSETS) else None
         show_fig = bool(fig and fig.exists())
         last_i = len(slides) - 1
-        # Figure-dominant for title / idea / leakage / winners / CP / final
-        fig_heavy = i in (0, 1, 3, 4, 6, last_i)
+        # Figure-dominant: title, idea, leakage, winners, rural, CP, final
+        fig_heavy = i in (0, 1, 2, 3, 4, 5, last_i)
 
         y = H - 2.2 * cm
         c.setFillColor(colors.HexColor("#222222"))
