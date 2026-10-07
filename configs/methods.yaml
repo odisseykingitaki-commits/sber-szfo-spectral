@@ -1,0 +1,50 @@
+# Method hyperparameters (Task 1). Source of truth for jury.
+# Scripts currently hardcode the same values — keep in sync.
+
+plm:
+  C_reg: 0.2
+  penalty: l2
+  solver: lbfgs
+  max_iter: 3000
+  tol: 1.0e-6
+  binarization: "z > 0 after StandardScaler"
+
+threshold:
+  rule: "label = (U1 > median(U1))"
+  U1: "X @ v1"          # v1 = leading eigenvector of J
+  canonical: true
+
+louvain:
+  distance_space: "U = X @ V[:, :5]"   # first 5 modes
+  quantile_eps: 0.40                  # ε ≈ 3.781 on nonzero distances
+  resolution: 0.5
+  seed: 42
+  min_size: 10                        # merge communities smaller than this
+  # Verified outcomes (adjacency_final / labels_louvain):
+  #   connected_components: [278, 1, 1]
+  #   raw_communities: [149, 129, 1, 1]
+  #   after_merge: [149, 129, 2]
+  run_on: full_graph                  # NOT only giant component
+
+bootstrap:
+  n: 100
+  metric: ARI_vs_full_sample_labels
+  # known caveat: rows resampled after scaler fit on full N
+
+robustness:
+  C_reg_list: [0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0]
+  baseline_C_reg: 0.2
+  metric: ARI_vs_baseline
+  # reported min ARI ≈ 0.972 (exact 0.97153)
+
+icvi:
+  metrics: [SW, CH, S_Dbw, AVI, AVU, MQ]
+  rows:
+    - threshold   # canonical
+    - Louvain
+    - KMeans_K2_to_K5
+  source_csv: results/icvi_full.csv
+
+kmeans_baseline:
+  K: 2
+  on: standardized_X

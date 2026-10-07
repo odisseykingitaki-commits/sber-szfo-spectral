@@ -1,0 +1,132 @@
+{
+  "note": "Основной метод = median threshold on U1 (11_final_clusters.py). labels_final.npy = Louvain from 06_network_louvain.py — NOT основной. DeepSeek 08_icvi wrongly used labels_final as «наш».",
+  "features": {
+    "N": 280,
+    "p": 17,
+    "feature_list_length": 17,
+    "feature_list": [
+      "share_health",
+      "share_marketplace",
+      "share_food",
+      "share_grocery",
+      "share_transport",
+      "log_total",
+      "growth_health",
+      "growth_marketplace",
+      "growth_food",
+      "growth_grocery",
+      "growth_transport",
+      "cv_health",
+      "cv_marketplace",
+      "cv_food",
+      "cv_grocery",
+      "cv_transport",
+      "mob_logratio"
+    ],
+    "source": "D:\\sber-project\\data\\processed\\features_szfo_v2_final.csv"
+  },
+  "labels_final_npy": {
+    "path": "D:\\sber-project\\results\\labels_final.npy",
+    "length": 280,
+    "matches_N": true,
+    "n_clusters": 3,
+    "sizes": [
+      149,
+      129,
+      2
+    ],
+    "interpreted_as": "Louvain (06)",
+    "verification": "OK: labels_final differs from threshold — treat as Louvain from 06"
+  },
+  "threshold_labels": {
+    "source": "csv:cluster",
+    "n_clusters": 2,
+    "sizes": [
+      140,
+      140
+    ],
+    "interpreted_as": "median_threshold_U1 (основной)"
+  },
+  "kmeans": {
+    "K": 2,
+    "n_init": 30,
+    "random_state": 42,
+    "sizes": [
+      152,
+      128
+    ]
+  },
+  "comparison_threshold_vs_kmeans": {
+    "method_name": "threshold_U1_median (ОСНОВНОЙ)",
+    "our": {
+      "SW": 0.3459996072460065,
+      "CH": 145.2492264815561,
+      "DB": 1.1920876831250422,
+      "n_clusters": 2,
+      "sizes": [
+        140,
+        140
+      ]
+    },
+    "kmeans": {
+      "SW": 0.3469036464283301,
+      "CH": 146.9861941448691,
+      "DB": 1.1377681231158363,
+      "n_clusters": 2,
+      "sizes": [
+        152,
+        128
+      ]
+    },
+    "ARI_our_vs_kmeans": 0.8353324974527174
+  },
+  "comparison_louvain_vs_kmeans": {
+    "method_name": "Louvain labels_final.npy (НЕ основной)",
+    "our": {
+      "SW": 0.3481073369402043,
+      "CH": 80.93957784181197,
+      "DB": 1.365469878974859,
+      "n_clusters": 3,
+      "sizes": [
+        149,
+        129,
+        2
+      ]
+    },
+    "kmeans": {
+      "SW": 0.3469036464283301,
+      "CH": 146.9861941448691,
+      "DB": 1.1377681231158363,
+      "n_clusters": 2,
+      "sizes": [
+        152,
+        128
+      ]
+    },
+    "ARI_our_vs_kmeans": 0.9147506289980523
+  },
+  "ARI_threshold_vs_louvain": 0.8354764130313292,
+  "paste": {
+    "N": 280,
+    "p": 17,
+    "feature_list_length": 17,
+    "threshold": {
+      "SW": 0.3459996072460065,
+      "CH": 145.2492264815561,
+      "DB": 1.1920876831250422,
+      "KMeans_SW": 0.3469036464283301,
+      "KMeans_CH": 146.9861941448691,
+      "KMeans_DB": 1.1377681231158363,
+      "ARI": 0.8353324974527174
+    },
+    "louvain_labels_final": {
+      "SW": 0.3481073369402043,
+      "CH": 80.93957784181197,
+      "DB": 1.365469878974859,
+      "KMeans_SW": 0.3469036464283301,
+      "KMeans_CH": 146.9861941448691,
+      "KMeans_DB": 1.1377681231158363,
+      "ARI": 0.9147506289980523
+    }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "q75_before": {
+    "label": "q75_baseline_prior_run",
+    "N": 280,
+    "lambda_max": 5.709,
+    "PR_plus": 4.35,
+    "Frustration": 0.55,
+    "SW": 0.331,
+    "sizes": [
+      140,
+      140
+    ],
+    "ARI_vs_KMeans": 0.957,
+    "ARI_vs_Louvain": 0.923,
+    "bootstrap_mean_std": [
+      0.902,
+      0.069
+    ],
+    "robustness_min_ARI": 0.972
+  },
+  "variant_C_after": {
+    "label": "variant_C_proxy_actual_run",
+    "N": 280,
+    "lambda_max": 5.784817073596944,
+    "PR_plus": 4.205846890326903,
+    "Frustration": 0.55,
+    "SW": 0.34500215220145447,
+    "sizes": [
+      140,
+      140
+    ],
+    "ARI_vs_KMeans": 0.9574496004539708,
+    "ARI_vs_Louvain": 0.9227276890291052,
+    "bootstrap_mean_std": [
+      0.9023999063671531,
+      0.06525656935529145
+    ],
+    "robustness_min_ARI": 0.971530612244898,
+    "calibration": {
+      "pearson_matched": 0.7495743162414124,
+      "a": 3.955044394048194,
+      "b": -24.59542054789105,
+      "R2": 0.5618616555687805,
+      "n_matched": 177,
+      "n_proxy": 103
+    },
+    "corr_log_total_log_income_all": 0.875457868127735,
+    "corr_log_total_log_income_rosstat": 0.7508289346092906,
+    "corr_log_total_log_income_proxy": 1.0
+  },
+  "experiments": {
+    "variant_C": {
+      "label": "variant_C_proxy_keep_both",
+      "N": 280,
+      "p": 20,
+      "lambda_max": 5.784817073596944,
+      "PR_plus": 4.205846890326903,
+      "Frustration": 0.55,
+      "SW": 0.34500215220145447,
+      "sizes": [
+        140,
+        140
+      ],
+      "ARI_vs_KMeans": 0.9574496004539708,
+      "corr_log_total_log_income": 0.875457868127735,
+      "features": [
+        "share_health",
+        "share_marketplace",
+        "share_food",
+        "share_grocery",
+        "share_transport",
+        "log_total",
+        "growth_health",
+        "growth_marketplace",
+        "growth_food",
+        "growth_grocery",
+        "growth_transport",
+        "cv_health",
+        "cv_marketplace",
+        "cv_food",
+        "cv_grocery",
+        "cv_transport",
+        "mob_logratio",
+        "log_income_2024",
+        "income_growth",
+        "income_cv"
+      ]
+    },
+    "residual_income": {
+      "label": "residual_income_plus_log_total",
+      "N": 280,
+      "p": 18,
+      "lambda_max": 5.570669164277848,
+      "PR_plus": 3.704168845132136,
+      "Frustration": 0.6111111111111112,
+      "SW": 0.3302120750047219,
+      "sizes": [
+        140,
+        140
+      ],
+      "ARI_vs_KMeans": 0.8353292336198043,
+      "corr_log_total_log_income": null,
+      "features": [
+        "share_health",
+        "share_marketplace",
+        "share_food",
+        "share_grocery",
+        "share_transport",
+        "log_total",
+        "growth_health",
+        "growth_marketplace",
+        "growth_food",
+        "growth_grocery",
+        "growth_transport",
+        "cv_health",
+        "cv_marketplace",
+        "cv_food",
+        "cv_grocery",
+        "cv_transport",
+        "mob_logratio",
+        "residual_income"
+      ]
+    },
+    "no_income": {
+      "label": "no_income_features",
+      "N": 280,
+      "p": 17,
+      "lambda_max": 5.5405224777197795,
+      "PR_plus": 3.4396002708663502,
+      "Frustration": 0.5882352941176471,
+      "SW": 0.3459996072460065,
+      "sizes": [
+        140,
+        140
+      ],
+      "ARI_vs_KMeans": 0.8353324974527174,
+      "corr_log_total_log_income": null,
+      "features": [
+        "share_health",
+        "share_marketplace",
+        "share_food",
+        "share_grocery",
+        "share_transport",
+        "log_total",
+        "growth_health",
+        "growth_marketplace",
+        "growth_food",
+        "growth_grocery",
+        "growth_transport",
+        "cv_health",
+        "cv_marketplace",
+        "cv_food",
+        "cv_grocery",
+        "cv_transport",
+        "mob_logratio"
+      ]
+    }
+  },
+  "recommendation": "Keep Variant C for jury (DeepSeek C) but document double-count: proxy corr(log_total, log_income)≈1.000. Residual SW=0.330 vs C SW=0.345 vs no-income SW=0.346."
+}

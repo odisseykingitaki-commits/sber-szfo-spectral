@@ -1,0 +1,22 @@
+{
+  "method": "median_threshold_U1_PLM_v1_no_income",
+  "C_reg": 0.2,
+  "N": 280,
+  "p": 17,
+  "lambda_max": 5.5405224777197795,
+  "PR_plus": 3.4396002708663502,
+  "Frustration": 0.5882352941176471,
+  "SW": 0.3459996072460065,
+  "sizes": [
+    140,
+    140
+  ],
+  "ARI_vs_KMeans": 0.8353324974527174,
+  "ARI_vs_Louvain": 0.8354764130313292,
+  "bootstrap_mean": 0.8966276130771762,
+  "bootstrap_std": 0.07036693421335784,
+  "bootstrap_n": 100,
+  "robustness_min_ARI": 0.971530612244898,
+  "features": "5 share + log_total + 5 growth + 5 cv + mob_logratio = 17",
+  "note": "Rosstat income rejected; q75/Variant C were ablations only"
+}

@@ -1,0 +1,38 @@
+{
+  "variant": "C_proxy_ols",
+  "n_matched": 177,
+  "n_proxy": 103,
+  "log_income": {
+    "formula": "log_income_2024 ~ a * log_total + b",
+    "pearson_corr_matched": 0.7495743162414124,
+    "a": 3.955044394048194,
+    "b": -24.59542054789105,
+    "R2": 0.5618616555687805
+  },
+  "income_growth": {
+    "predictors": [
+      "log_total",
+      "_mean_growth",
+      "_mean_cv"
+    ],
+    "R2": 0.027640124782061792,
+    "used_matched_median_fallback": true,
+    "coef": null
+  },
+  "income_cv": {
+    "predictors": [
+      "log_total",
+      "_mean_growth",
+      "_mean_cv"
+    ],
+    "R2": 0.09798388256950852,
+    "used_matched_median_fallback": false,
+    "coef": {
+      "log_total": 0.1287198379311636,
+      "mean_growth": 0.21316714147882432,
+      "mean_cv": -0.08244321565045117,
+      "intercept": -1.1241576713434411
+    }
+  },
+  "double_count_note": "For proxy rows, log_income_2024 is an affine function of log_total; both enter PLM -> near-collinearity on n_proxy rows. See variant_c_comparison.json."
+}

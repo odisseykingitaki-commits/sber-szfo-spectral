@@ -1,0 +1,22 @@
+# Pinned to versions installed in conda env `sber` (checked 2026-10-04).
+# Install: conda activate sber && pip install -r requirements.txt
+
+numpy==2.4.6
+pandas==3.0.6
+scipy==1.17.1
+scikit-learn==1.9.1
+networkx==3.6.1
+matplotlib==3.11.2
+pyarrow==25.0.1
+openpyxl==3.1.5
+
+# Task 2 forecasting / changepoints
+prophet==1.4.0
+lightgbm==4.7.0
+catboost==1.2.10
+ruptures==1.1.10
+pytrends==4.9.2
+
+# Prophet stack (present in sber env)
+cmdstanpy==1.3.0
+holidays==0.105

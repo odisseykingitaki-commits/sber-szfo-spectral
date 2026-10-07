@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Raw inputs (place locally; see INSTALL.md)
+data/raw/*
+!data/raw/.gitkeep
+
+data/intermediate/*.parquet
+
+# Large arrays: regenerate via run_all / scripts 05–11
+*.npy
+!results/labels_threshold.npy
+!results/labels_louvain.npy
+
+catboost_info/
+run_log.txt
+.DS_Store
+*.log
+.conda/

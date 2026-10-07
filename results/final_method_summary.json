@@ -1,0 +1,19 @@
+{
+  "method": "median_threshold_U1_PLM_v1",
+  "C_reg": 0.2,
+  "N": 280,
+  "p": 17,
+  "SW": 0.3459996072460065,
+  "sizes": [
+    140,
+    140
+  ],
+  "labels_file": "labels_threshold.npy",
+  "ARI_vs_KMeans": 0.8353324974527174,
+  "ARI_vs_Louvain": 0.8354764130313292,
+  "lambda_max": 5.5405224777197795,
+  "PR_plus": 3.4396002708663502,
+  "Frustration": 0.5882352941176471,
+  "n_pos": 7,
+  "n_neg": 10
+}
