@@ -121,7 +121,7 @@ def slide01_title(d):
     )
     ax.text(
         0.5, 0.60,
-        "280 МО СЗФО  ·  2 спектральных типа  ·  ≈24 месяца",
+        "280 МО СЗФО  ·  2 режима потребления  ·  ≈24 месяца",
         ha="center", va="center", fontsize=13, color="#c8d4e4",
     )
 
@@ -149,42 +149,45 @@ def slide02_idea(d):
     ax.set_ylim(0, 1)
     ax.axis("off")
     ax.set_title(
-        "Одна типология — два способа смотреть в будущее",
-        color=C_ACCENT, fontsize=15, pad=10, fontweight="bold",
+        "Два типа территорий по структуре расходов — затем прогноз и сдвиги",
+        color=C_ACCENT, fontsize=13, pad=10, fontweight="bold",
     )
 
-    # Task 1 source
-    _card(ax, 0.28, 0.72, 0.44, 0.16, ec=C_ACCENT, fc="#e8eef5", lw=2)
-    ax.text(0.50, 0.84, "Task 1 · спектральная типология",
+    # Self-contained grouping (no Task 1 prerequisite)
+    _card(ax, 0.18, 0.70, 0.64, 0.18, ec=C_ACCENT, fc="#e8eef5", lw=2)
+    ax.text(0.50, 0.84, "2 режима потребления · 140 / 140",
             ha="center", fontsize=12, fontweight="bold", color=C_ACCENT)
-    ax.text(0.50, 0.76, "Тип A (сельские)  ·  Тип B (городские)  ·  140 / 140",
-            ha="center", fontsize=10, color=C_INK)
+    ax.text(
+        0.50, 0.76,
+        "Тип A ↑ grocery   ·   Тип B ↑ food / transport",
+        ha="center", fontsize=10, color=C_INK,
+    )
 
     # arrows down
-    ax.annotate("", xy=(0.28, 0.58), xytext=(0.42, 0.72),
+    ax.annotate("", xy=(0.28, 0.56), xytext=(0.42, 0.70),
                 arrowprops=dict(arrowstyle="->", color=C_MUTED, lw=1.8))
-    ax.annotate("", xy=(0.72, 0.58), xytext=(0.58, 0.72),
+    ax.annotate("", xy=(0.72, 0.56), xytext=(0.58, 0.70),
                 arrowprops=dict(arrowstyle="->", color=C_MUTED, lw=1.8))
 
     # A / B
-    _card(ax, 0.06, 0.28, 0.40, 0.30, ec=C_TEAL, lw=2.5)
-    ax.text(0.26, 0.51, "A · ПРОГНОЗ", ha="center", fontsize=13,
+    _card(ax, 0.06, 0.26, 0.40, 0.30, ec=C_TEAL, lw=2.5)
+    ax.text(0.26, 0.49, "A · ПРОГНОЗ", ha="center", fontsize=13,
             fontweight="bold", color=C_TEAL)
-    ax.text(0.26, 0.38,
+    ax.text(0.26, 0.36,
             "агрегаты расходов\nH = 1 / 3 / 6 / 12\nnaive · Prophet · LGBM…\n→ MAE-таблица",
             ha="center", va="center", fontsize=10, color=C_INK, linespacing=1.4)
 
-    _card(ax, 0.54, 0.28, 0.40, 0.30, ec=C_CORAL, lw=2.5)
-    ax.text(0.74, 0.51, "B · CHANGEPOINTS", ha="center", fontsize=13,
+    _card(ax, 0.54, 0.26, 0.40, 0.30, ec=C_CORAL, lw=2.5)
+    ax.text(0.74, 0.49, "B · CHANGEPOINTS", ha="center", fontsize=13,
             fontweight="bold", color=C_CORAL)
-    ax.text(0.74, 0.38,
+    ax.text(0.74, 0.36,
             "сигнал [λ₁…λ₅, PR₊]\n9 методов ruptures\nконсенсус ≥ 50%\n→ даты сдвигов",
             ha="center", va="center", fontsize=10, color=C_INK, linespacing=1.4)
 
     # leakage badge
-    _card(ax, 0.12, 0.06, 0.76, 0.14, ec=C_GOLD, fc="#fbf6e8", lw=2)
+    _card(ax, 0.12, 0.05, 0.76, 0.14, ec=C_GOLD, fc="#fbf6e8", lw=2)
     ax.text(
-        0.50, 0.13,
+        0.50, 0.12,
         "Все прогнозные фичи — только из прошлого  (end_dt < ds)",
         ha="center", va="center", fontsize=12, fontweight="bold", color=C_GOLD,
     )
@@ -478,7 +481,7 @@ def slide07_external(d):
     items = [
         ("[OK]", "выровнен по дате с расходами", C_OK),
         ("[OK]", "без заглядывания вперёд", C_OK),
-        ("[!]", "один ряд на оба спектральных типа", C_GOLD),
+        ("[!]", "один ряд на оба режима потребления", C_GOLD),
         ("[!]", "часто ухудшает MAE после фикса", C_GOLD),
     ]
     for i, (mark, text, col) in enumerate(items):

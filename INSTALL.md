@@ -2,9 +2,10 @@
 
 Аудитория: ML-инженеры / проверяющие. Цель — поднять окружение и прогнать пайплайн без сюрпризов.
 
-> **Task 2:** прогноз расходов по спектральным кластерам + changepoints.  
+> **Task 2:** прогноз расходов по двум режимам потребления + changepoints.  
 > Канон метрик: `results/forecast_all_models.csv` (после фикса `end_dt < ds`).  
-> Пакет документов: `docs/TASK2_METHOD_REPORT.md`, `docs/TASK2_slides.md`, PDF в `docs/`.
+> Пакет документов: `docs/TASK2_METHOD_REPORT.md`, `docs/TASK2_slides.md`, PDF в `docs/`.  
+> Жюри, читающее только материалы Task 2, должно понимать постановку из `TASK2_METHOD_REPORT.md` (§0) без отчёта Task 1.
 
 ## 1. Окружение
 
@@ -120,12 +121,12 @@ pip install reportlab pillow pyyaml
 
 Конфиги жюри: `configs/task2_config.yaml`, `configs/task2_methods.yaml`.
 
-### Только Task 2 (нужны артефакты Task 1)
+### Только Task 2 (нужны готовые признаки/метки)
 
-Сначала должны существовать:
+Task 2 можно понять и запустить после того, как существуют features/labels; жюри, читающее только материалы Task 2, всё равно должно понимать историю из `docs/TASK2_METHOD_REPORT.md` (§0) отдельно. Сначала должны существовать:
 
-- `results/labels_threshold.npy` (кластеры 0/1)
-- `results/dynamic_summary.json` (скользящие окна → спектральный сигнал)
+- `results/labels_threshold.npy` (Тип A / Тип B, 140/140)
+- `results/dynamic_summary.json` (скользящие окна PLM → спектральный сигнал)
 - `data/intermediate/spend.parquet`
 - опционально `data/processed/google_trends_szfo.csv`
 
