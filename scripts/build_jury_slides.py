@@ -129,7 +129,7 @@ def slides_spec(m: dict):
         {
             "title": "Одна ось превращает 17 признаков в два режима",
             "phrases": [
-                "U₁ = X · v₁, порог = медиана → 140 / 140",
+                "U₁ = X · v₁ · порог = медиана → 140 / 140",
                 "Типология строится по главной коллективной оси.",
             ],
             "fig": "slide06_U1_median_split.png",
@@ -185,8 +185,8 @@ def slides_spec(m: dict):
                 "Мы нашли коллективную ось их поведения.",
             ],
             "fig": "slide11_finale.png",
-            "footer": "метод и pipeline — в репозитории (ссылка справа)",
-            "fig_frac": 0.70,
+            "footer": "метод и pipeline в репозитории",
+            "fig_frac": 0.68,
         },
     ]
 
@@ -204,9 +204,9 @@ def build():
     page = landscape(A4)
     c = canvas.Canvas(str(OUT), pagesize=page)
     W, H = page
-    mx = 1.0 * cm
-    header_h = 1.45 * cm
-    footer_h = 0.65 * cm
+    mx = 1.15 * cm
+    header_h = 1.55 * cm
+    footer_h = 0.75 * cm
 
     for i, s in enumerate(specs):
         # background
@@ -220,12 +220,13 @@ def build():
         # title (conclusion) — wrap if needed
         c.setFillColor(colors.white)
         title = s["title"]
-        size = 16 if len(title) < 70 else 13.5
+        size = 16 if len(title) < 70 else 14
         c.setFont(font_b, size)
         max_w = W - 2 * mx
         if c.stringWidth(title, font_b, size) <= max_w:
-            c.drawString(mx, H - 0.95 * cm, title)
+            c.drawString(mx, H - 1.0 * cm, title)
         else:
+            # two-line wrap at nearest space mid
             words = title.split()
             line1, line2 = "", ""
             for w in words:
@@ -235,36 +236,32 @@ def build():
                 else:
                     line2 = (line2 + " " + w).strip()
             c.setFont(font_b, size - 1)
-            c.drawString(mx, H - 0.7 * cm, line1)
+            c.drawString(mx, H - 0.75 * cm, line1)
             if line2:
-                c.drawString(mx, H - 1.15 * cm, line2)
+                c.drawString(mx, H - 1.25 * cm, line2)
 
-        # phrases — compact
-        y = H - header_h - 0.32 * cm
+        # phrases
+        y = H - header_h - 0.45 * cm
         c.setFillColor(colors.HexColor(C_INK))
         for ph in s["phrases"][:4]:
-            c.setFont(font, 11.5)
+            c.setFont(font, 12)
             c.drawString(mx, y, ph)
-            y -= 0.40 * cm
+            y -= 0.48 * cm
 
-        # figure uses nearly all remaining space (charts dominate)
+        # figure band — fill nearly all remaining space (chart-first)
         fig_path = ASSETS / s["fig"]
-        band_top = y - 0.08 * cm
-        band_bottom = footer_h + 0.22 * cm
-        band_h = max(band_top - band_bottom, 4.0 * cm)
+        band_top = y - 0.12 * cm
+        band_bottom = footer_h + 0.28 * cm
+        band_h = max(band_top - band_bottom, 3.5 * cm)
         band_w = W - 2 * mx
 
         if fig_path.exists():
             img = ImageReader(str(fig_path))
             nw, nh = img.getSize()
             scale = min(band_w / nw, band_h / nh)
-            # prefer filling width when aspect allows slight crop-free scale-up
             iw, ih = nw * scale, nh * scale
             x_img = (W - iw) / 2
-            # pin image to top of band to kill empty gap under phrases
-            y_img = band_top - ih
-            if y_img < band_bottom:
-                y_img = band_bottom
+            y_img = band_bottom + (band_h - ih) / 2
             c.drawImage(img, x_img, y_img, width=iw, height=ih,
                         preserveAspectRatio=True, mask="auto")
         else:
@@ -272,14 +269,21 @@ def build():
             c.setFont(font, 10)
             c.drawString(mx, band_bottom + band_h / 2, f"[missing {s['fig']}]")
 
-        # footer
+        # footer + teal/orange accent
         c.setFillColor(colors.HexColor(C_MUTED))
         c.setFont(font, 7.5)
         left = s.get("footer") or ""
         right = f"Task 1 · {i + 1}/11 · {REPO_URL}"
-        if left:
-            c.drawString(mx, 0.28 * cm, left[:95])
-        c.drawRightString(W - mx, 0.28 * cm, right)
+        # keep left footer short; full URL always on the right
+        if left and "http" not in left:
+            c.drawString(mx, 0.32 * cm, left[:100])
+        elif left and "http" in left:
+            c.drawString(mx, 0.32 * cm, "метод и pipeline в репозитории")
+        c.drawRightString(W - mx, 0.32 * cm, right)
+        c.setFillColor(colors.HexColor(C_TEAL))
+        c.rect(0, 0, W * 0.55, 0.1 * cm, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#c45c26"))
+        c.rect(W * 0.55, 0, W * 0.45, 0.1 * cm, fill=1, stroke=0)
 
         c.showPage()
 

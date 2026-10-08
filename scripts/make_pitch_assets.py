@@ -179,8 +179,8 @@ def fig_slide02_kmeans_vs_j(d):
 def fig_slide03_j_map(d):
     J = d["J"]
     feat = [_short(f) for f in d["feat"]]
-    fig = plt.figure(figsize=(12.8, 7.0))
-    ax = fig.add_axes([0.12, 0.14, 0.68, 0.78])
+    fig = plt.figure(figsize=(13.2, 7.0))
+    ax = fig.add_axes([0.10, 0.12, 0.72, 0.80])
     cmap = LinearSegmentedColormap.from_list(
         "nto", [C_ORANGE, "#ffffff", C_TEAL], N=256
     )
@@ -188,25 +188,35 @@ def fig_slide03_j_map(d):
     im = ax.imshow(J, cmap=cmap, vmin=-vmax, vmax=vmax, aspect="equal")
     ax.set_xticks(range(len(feat)))
     ax.set_yticks(range(len(feat)))
-    ax.set_xticklabels(feat, rotation=65, ha="right", fontsize=9)
-    ax.set_yticklabels(feat, fontsize=9)
+    ax.set_xticklabels(feat, rotation=65, ha="right", fontsize=10)
+    ax.set_yticklabels(feat, fontsize=10)
     ax.set_title("Карта зависимостей признаков · diag(J)=0", color=C_NAVY, fontsize=15)
-    # highlight strongest off-diag
     Joff = J.copy()
     np.fill_diagonal(Joff, 0)
-    flat = np.abs(Joff).ravel()
-    thr = np.quantile(flat, 0.92)
+    thr = np.quantile(np.abs(Joff).ravel(), 0.92)
     ys, xs = np.where(np.abs(Joff) >= thr)
     for y, x in zip(ys, xs):
         if x >= y:
             continue
         ax.add_patch(plt.Rectangle((x - 0.5, y - 0.5), 1, 1,
                                    fill=False, edgecolor=C_NAVY, lw=1.6))
-    cax = fig.add_axes([0.84, 0.25, 0.025, 0.55])
+    cax = fig.add_axes([0.84, 0.22, 0.028, 0.58])
     fig.colorbar(im, cax=cax)
-    # arrow hint
-    fig.text(0.92, 0.12, "J →\nспектр", ha="center", va="center",
-             fontsize=12, color=C_NAVY, fontweight="bold")
+    ax2 = fig.add_axes([0.90, 0.35, 0.09, 0.35])
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    ax2.axis("off")
+    for i, lab in enumerate(["J", "спектр", "v₁"]):
+        y = 0.85 - i * 0.32
+        ax2.add_patch(FancyBboxPatch(
+            (0.05, y - 0.1), 0.9, 0.2, boxstyle="round,pad=0.02",
+            facecolor=C_CARD, edgecolor=C_NAVY, lw=1.4,
+        ))
+        ax2.text(0.5, y, lab, ha="center", va="center", fontsize=11,
+                 fontweight="bold", color=C_NAVY)
+        if i < 2:
+            ax2.annotate("", xy=(0.5, y - 0.14), xytext=(0.5, y - 0.1),
+                         arrowprops=dict(arrowstyle="->", color=C_TEAL, lw=1.8))
     return _save(fig, "slide03_j_heatmap.png")
 
 
@@ -384,24 +394,27 @@ def fig_slide07_robustness(d):
 
 def fig_slide08_dynamics(d):
     rows = d["aris"]
-    xs = [a["from"] for a in rows]
-    ys = [a["ari"] for a in rows]
+    xs = np.array([int(a["from"]) for a in rows])
+    ys = np.array([a["ari"] for a in rows], dtype=float)
     mean_ari = float(np.mean(ys))
-    fig, ax = plt.subplots(figsize=(13.0, 6.8))
-    ax.bar(xs, ys, color=C_TEAL, edgecolor="white", width=0.78, zorder=2)
-    ax.axhline(mean_ari, color=C_ORANGE, ls="--", lw=2.4, zorder=3,
+    fig, ax = plt.subplots(figsize=(13.2, 6.9))
+    ax.plot(xs, ys, "o-", color=C_TEAL, lw=2.8, ms=9, zorder=3)
+    ax.fill_between(xs, ys, mean_ari, alpha=0.12, color=C_TEAL)
+    ax.axhline(mean_ari, color=C_ORANGE, ls="--", lw=2.4, zorder=2,
                label=f"mean ARI ≈ {mean_ari:.2f}")
+    ax.set_xticks(xs)
     ax.set_xlabel("окно t → t+1  (19 окон × 6 месяцев)", fontsize=12)
     ax.set_ylabel("ARI", fontsize=13)
-    ax.set_ylim(0.55, 1.02)
+    ax.set_ylim(0.65, 1.02)
     ax.set_title(
         f"Устойчивость между окнами · перебежчики "
         f"{d['n_switch']}/{d['n_traj']} = {100 * d['n_switch'] / d['n_traj']:.1f}%",
         color=C_NAVY, fontsize=14,
     )
-    ax.legend(frameon=False, loc="lower right", fontsize=12)
+    ax.legend(frameon=False, loc="lower right", fontsize=13)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.grid(True, axis="y", color="#e2e8f0", lw=0.7)
     fig.tight_layout()
     return _save(fig, "slide08_dynamics_ari.png")
 
@@ -553,20 +566,20 @@ def write_readme(paths, d):
         f"Canon: p={d['p']} N={d['N']} lam1={d['evals'][0]:.4f} "
         f"boot={d['boot'].mean():.3f} switch={d['n_switch']}/{d['n_traj']}",
         "",
-        "slide01_hook_cloud.png              → 1 HOOK",
-        "slide02_kmeans_vs_j.png             → 2 WHY NOT KMEANS",
-        "slide03_j_heatmap.png               → 3 MAP OF DEPENDENCIES",
-        "slide04_spectrum.png                → 4 MAGIC",
-        "slide05_mode1_loadings.png          → 5 ECONOMIC MEANING",
-        "slide06_U1_median_split.png         → 6 WOW CENTERPIECE",
-        "slide07_robustness.png              → 7 ROBUSTNESS",
-        "slide08_dynamics_ari.png            → 8 DYNAMICS",
-        "slide09_vologodsky_trajectory.png   → 9 EXAMPLE",
-        "slide10_value_quote.png             → 10 ANALYST VALUE",
-        "slide11_finale.png                  → 11 FINALE",
+        "slide01_hook_cloud.png              -> 1 HOOK",
+        "slide02_kmeans_vs_j.png             -> 2 WHY NOT KMEANS",
+        "slide03_j_heatmap.png               -> 3 MAP OF DEPENDENCIES",
+        "slide04_spectrum.png                -> 4 MAGIC",
+        "slide05_mode1_loadings.png          -> 5 ECONOMIC MEANING",
+        "slide06_U1_median_split.png         -> 6 WOW CENTERPIECE",
+        "slide07_robustness.png              -> 7 ROBUSTNESS",
+        "slide08_dynamics_ari.png            -> 8 DYNAMICS",
+        "slide09_vologodsky_trajectory.png   -> 9 EXAMPLE",
+        "slide10_value_quote.png             -> 10 ANALYST VALUE",
+        "slide11_finale.png                  -> 11 FINALE",
         "",
         "Rebuild: python scripts/make_pitch_assets.py",
-        "PDF:     python scripts/build_task1_pdfs.py",
+        "PDF:     python scripts/build_task1_pdfs.py --slides-only",
     ]
     (OUT / "README.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("  -> README.txt")
@@ -590,12 +603,12 @@ def copy_pipeline_figs():
 def main():
     _style()
     OUT.mkdir(parents=True, exist_ok=True)
-    print("Loading canon data…")
+    print("Loading canon data...")
     d = load_canon()
     print(f"  N={d['N']} p={d['p']} lam1={d['evals'][0]:.4f} "
           f"sizes={np.bincount(d['labels']).tolist()} "
           f"switch={d['n_switch']}/{d['n_traj']}")
-    print("Rendering slides…")
+    print("Rendering slides...")
     paths = [
         fig_slide01_hook(d),
         fig_slide02_kmeans_vs_j(d),
@@ -609,10 +622,10 @@ def main():
         fig_slide10_value(d),
         fig_slide11_finale(d),
     ]
-    print("Copying pipeline figures…")
+    print("Copying pipeline figures...")
     copy_pipeline_figs()
     write_readme(paths, d)
-    print(f"\nDone → {OUT}")
+    print(f"\nDone -> {OUT}")
 
 
 if __name__ == "__main__":
