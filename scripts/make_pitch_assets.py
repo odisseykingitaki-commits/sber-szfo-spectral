@@ -1,4 +1,4 @@
-"""Generate chart-first PNG visuals for Task-1 jury pitch → docs/presentation_assets/.
+"""Generate chart-first PNG visuals for Task-1 jury pitch → scripts/_pitch/presentation_assets/.
 
 Run from repo root:
     python scripts/make_pitch_assets.py
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from utils import feature_cols, DATA_PROC, RESULTS, FIGURES  # noqa: E402
 
-OUT = ROOT / "docs" / "presentation_assets"
+OUT = ROOT / "scripts" / "_pitch" / "presentation_assets"
 FEAT = DATA_PROC / "features_szfo_v2_final.csv"
 
 # Navy + teal + orange

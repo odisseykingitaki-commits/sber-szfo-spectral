@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-ROOT = Path(r"D:\sber-project")
-OUT = ROOT / "docs" / "presentation_assets"
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "scripts" / "_pitch" / "presentation_assets"
 OUT.mkdir(parents=True, exist_ok=True)
 
 FEATURE_COLS = [

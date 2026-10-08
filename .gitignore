@@ -23,4 +23,4 @@ results/_backup*/
 results/_bak*/
 
 # local visual QA renders of slides
-docs/presentation_assets/_qa/
+scripts/_pitch/presentation_assets/_qa/

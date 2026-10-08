@@ -12,13 +12,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
+JURY = ROOT / "для_жюри"
+PITCH = ROOT / "scripts" / "_pitch"
 FIGURES = ROOT / "figures"
-ASSETS = DOCS / "presentation_assets"
-OUT_REPORT = DOCS / "TASK1_method_report.pdf"
-OUT_SLIDES = DOCS / "TASK1_presentation.pdf"
-MD_REPORT = DOCS / "TASK1_METHOD_REPORT.md"
-MD_SLIDES = DOCS / "TASK1_slides.md"
+ASSETS = PITCH / "presentation_assets"
+OUT_REPORT = JURY / "TASK1_method_report.pdf"
+OUT_SLIDES = JURY / "TASK1_presentation.pdf"
+MD_REPORT = JURY / "TASK1_METHOD_REPORT.md"
+MD_SLIDES = PITCH / "TASK1_slides.md"
 REPO_URL = "https://github.com/odisseykingitaki-commits/sber-szfo-spectral"
 
 FIG_NAMES = [

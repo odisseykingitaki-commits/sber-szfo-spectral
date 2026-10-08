@@ -1,4 +1,4 @@
-"""Build chart-first jury PDF: docs/TASK1_presentation.pdf (11 landscape slides).
+"""Build chart-first jury PDF: для_жюри/TASK1_presentation.pdf (11 landscape slides).
 
 Layout: conclusion headline → 2–4 short phrases → dominant chart (50–70%) → tiny footer.
 Does NOT dump the method report into slides.
@@ -14,9 +14,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-DOCS = ROOT / "docs"
-ASSETS = DOCS / "presentation_assets"
-OUT = DOCS / "TASK1_presentation.pdf"
+JURY = ROOT / "для_жюри"
+ASSETS = ROOT / "scripts" / "_pitch" / "presentation_assets"
+OUT = JURY / "TASK1_presentation.pdf"
 REPO_URL = "https://github.com/odisseykingitaki-commits/sber-szfo-spectral"
 
 C_BG = "#f4f6f8"

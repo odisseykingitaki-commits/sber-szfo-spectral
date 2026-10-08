@@ -1,7 +1,7 @@
 # Task 1 — pitch для жюри (11 слайдов)
 
 Отдельный артефакт от методологического отчёта.  
-Глубина формул — в `docs/TASK1_METHOD_REPORT.md`.  
+Глубина формул — в `для_жюри/TASK1_METHOD_REPORT.md`.  
 Числа только из `results/*` (канон no-income, p=17).
 
 Сборка:
@@ -25,7 +25,7 @@ python scripts/build_jury_slides.py
 
 СЗФО · 280 МО · СберИндекс 2023–2024
 
-**Рисунок:** `docs/presentation_assets/slide01_hook_cloud.png`  
+**Рисунок:** `scripts/_pitch/presentation_assets/slide01_hook_cloud.png`  
 *(PCA-портрет 280 МО в пространстве признаков, без режимов; не карта СЗФО)*
 
 ---
@@ -36,7 +36,7 @@ python scripts/build_jury_slides.py
 
 Не только «кто с кем похож». А «что связывает систему».
 
-**Рисунок:** `docs/presentation_assets/slide02_kmeans_vs_j.png`  
+**Рисунок:** `scripts/_pitch/presentation_assets/slide02_kmeans_vs_j.png`  
 *(слева: похожесть объектов в PC; справа: реальная J 17×17)*
 
 ---
@@ -47,7 +47,7 @@ python scripts/build_jury_slides.py
 
 PLM → симметричная J → готова к спектру.
 
-**Рисунок:** `docs/presentation_assets/slide03_j_heatmap.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide03_j_heatmap.png`
 
 ---
 
@@ -58,7 +58,7 @@ PLM → симметричная J → готова к спектру.
 λ₁ = 5.541 · 47.1% положительной спектральной массы.  
 Первая мода доминирует.
 
-**Рисунок:** `docs/presentation_assets/slide04_spectrum.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide04_spectrum.png`
 
 ---
 
@@ -70,7 +70,7 @@ Food +0.391 · Grocery −0.374 · Transport +0.334 · Log total +0.327 · Healt
 
 Два полюса — паттерны потребления, не юр. статус МО.
 
-**Рисунок:** `docs/presentation_assets/slide05_mode1_loadings.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide05_mode1_loadings.png`
 
 ---
 
@@ -81,7 +81,7 @@ Food +0.391 · Grocery −0.374 · Transport +0.334 · Log total +0.327 · Healt
 U₁ = X · v₁, порог = медиана → 140 / 140.  
 Типология строится по главной коллективной оси.
 
-**Рисунок:** `docs/presentation_assets/slide06_U1_median_split.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide06_U1_median_split.png`
 
 ---
 
@@ -93,7 +93,7 @@ Bootstrap 0.897±0.070 · C_reg min ARI 0.972 · Louvain ARI≈0.835 · дина
 
 Разные проверки показывают одну крупномасштабную структуру.
 
-**Рисунок:** `docs/presentation_assets/slide07_robustness.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide07_robustness.png`
 
 ---
 
@@ -104,7 +104,7 @@ Bootstrap 0.897±0.070 · C_reg min ARI 0.972 · Louvain ARI≈0.835 · дина
 19 окон × 6 месяцев · 49/277 = 17.7% сменили режим.  
 Система живая, но крупная структура сохраняется (mean ARI ≈ 0.89).
 
-**Рисунок:** `docs/presentation_assets/slide08_dynamics_ari.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide08_dynamics_ari.png`
 
 ---
 
@@ -115,7 +115,7 @@ Bootstrap 0.897±0.070 · C_reg min ARI 0.972 · Louvain ARI≈0.835 · дина
 вологодский · 8 переключений / 19 окон.  
 Часть МО у границы двух режимов.
 
-**Рисунок:** `docs/presentation_assets/slide09_vologodsky_trajectory.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide09_vologodsky_trajectory.png`
 
 ---
 
@@ -128,7 +128,7 @@ Bootstrap 0.897±0.070 · C_reg min ARI 0.972 · Louvain ARI≈0.835 · дина
 > Мы не просто нашли два кластера.  
 > Мы нашли ось, вдоль которой организована структура потребительского поведения МО.
 
-**Рисунок:** `docs/presentation_assets/slide10_value_quote.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide10_value_quote.png`
 
 ---
 
@@ -141,4 +141,4 @@ Bootstrap 0.897±0.070 · C_reg min ARI 0.972 · Louvain ARI≈0.835 · дина
 
 Метод и pipeline: https://github.com/odisseykingitaki-commits/sber-szfo-spectral
 
-**Рисунок:** `docs/presentation_assets/slide11_finale.png`
+**Рисунок:** `scripts/_pitch/presentation_assets/slide11_finale.png`

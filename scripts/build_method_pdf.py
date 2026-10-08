@@ -1,4 +1,4 @@
-"""Build docs/TASK1_method_report.pdf from markdown + figures (reportlab)."""
+"""Build для_жюри/TASK1_method_report.pdf from markdown + figures (reportlab)."""
 from __future__ import annotations
 
 import re
@@ -24,8 +24,8 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
-MD = ROOT / "docs" / "TASK1_METHOD_REPORT.md"
-OUT = ROOT / "docs" / "TASK1_method_report.pdf"
+MD = ROOT / "для_жюри" / "TASK1_METHOD_REPORT.md"
+OUT = ROOT / "для_жюри" / "TASK1_method_report.pdf"
 FIGURES = ROOT / "figures"
 
 # Prefer DejaVu for Cyrillic
