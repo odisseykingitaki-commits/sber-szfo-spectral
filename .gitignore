@@ -21,3 +21,6 @@ run_log.txt
 
 results/_backup*/
 results/_bak*/
+
+# local visual QA renders of slides
+docs/presentation_assets/_qa/

@@ -39,7 +39,7 @@
 **Число переключений:** 8
 
 Файл: `case_vologodsky_trajectory.csv`  
-PNG: `slide08b_vologodsky_trajectory.png`  
+PNG: `slide09_vologodsky_trajectory.png`  
 Подпись под PNG: *Ось Y: метка режима (threshold). Ось X: конец 6-месячного окна. Красные линии — точки переключения.*
 
 ## Почему это важно

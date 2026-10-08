@@ -85,6 +85,8 @@ python 10_robustness.py
 
 ```bash
 python scripts/make_pitch_assets.py      # PNG → docs/presentation_assets/
+python scripts/build_jury_slides.py     # chart-first 11 slides PDF
+# или вместе с method report:
 python scripts/build_task1_pdfs.py
 ```
 

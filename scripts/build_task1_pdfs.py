@@ -28,21 +28,6 @@ FIG_NAMES = [
     "fig_bootstrap.png",
 ]
 
-# 0-based slide index → pitch visual (see scripts/make_pitch_assets.py)
-SLIDE_ASSETS = [
-    ASSETS / "slide01_title_card.png",
-    ASSETS / "slide02_hook_scatter.png",
-    ASSETS / "slide03_kmeans_vs_spectral.png",
-    ASSETS / "slide04_pipeline_flowchart.png",
-    ASSETS / "slide05_mode1_loadings.png",
-    ASSETS / "slide06_U1_median_split.png",
-    ASSETS / "slide07_stability_metric_cards.png",
-    ASSETS / "slide08_dynamics_ari.png",
-    ASSETS / "slide08b_vologodsky_trajectory.png",  # slide 9 — Vologda case
-    ASSETS / "slide09_value_blocks.png",
-    ASSETS / "slide10_takeaways_checklist.png",
-]
-
 
 def _find_font_paths():
     windir = Path(r"C:\Windows\Fonts")
@@ -309,149 +294,20 @@ def build_report_pdf():
 
 
 def build_slides_pdf():
-    from reportlab.lib.pagesizes import A4, landscape
-    from reportlab.lib.units import cm
-    from reportlab.pdfgen import canvas
-    from reportlab.lib import colors
-    from reportlab.lib.utils import ImageReader
+    """Delegate to chart-first jury builder (11 slides)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from build_jury_slides import build as build_jury  # noqa: WPS433
 
-    font, font_b = _register_fonts()
-    md = MD_SLIDES.read_text(encoding="utf-8")
-
-    # split by "## Слайд"
-    parts = re.split(r"\n## Слайд\s+", md)
-    slides = []
-    for part in parts[1:]:
-        lines = part.strip().splitlines()
-        if not lines:
-            continue
-        title = _strip_md(lines[0])
-        # drop leading "N — "
-        title = re.sub(r"^\d+\s*[—\-]\s*", "", title)
-        body_lines = []
-        for ln in lines[1:]:
-            if ln.strip() in ("---",):
-                continue
-            if ln.startswith("#"):
-                continue
-            body_lines.append(ln)
-        slides.append((title, body_lines))
-
-    page = landscape(A4)
-    c = canvas.Canvas(str(OUT_SLIDES), pagesize=page)
-    W, H = page
-    margin_x = 1.2 * cm
-    footer_h = 0.9 * cm
-    header_h = 1.4 * cm
-
-    for i, (title, body_lines) in enumerate(slides):
-        # background
-        c.setFillColor(colors.HexColor("#f7f5f1"))
-        c.rect(0, 0, W, H, fill=1, stroke=0)
-        c.setFillColor(colors.HexColor("#1e3a5f"))
-        c.rect(0, H - header_h, W, header_h, fill=1, stroke=0)
-
-        c.setFillColor(colors.white)
-        c.setFont(font_b, 15)
-        c.drawString(margin_x, H - 0.9 * cm, title[:95])
-
-        c.setFillColor(colors.HexColor("#666666"))
-        c.setFont(font, 7)
-        c.drawRightString(
-            W - 1.0 * cm, 0.4 * cm,
-            f"Task 1 · {i + 1}/{len(slides)} · {REPO_URL}",
-        )
-
-        fig = SLIDE_ASSETS[i] if i < len(SLIDE_ASSETS) else None
-        show_fig = bool(fig and fig.exists())
-        # Stacked layout: short bullets on top, full-width image below (no side float)
-        # Image gets ~58% of page height when present
-        text_bottom_limit = (H * 0.55) if show_fig else footer_h + 0.4 * cm
-        max_text_w = W - 2 * margin_x
-        y = H - header_h - 0.55 * cm
-        c.setFillColor(colors.HexColor("#222222"))
-        bullet_count = 0
-        max_bullets = 4 if show_fig else 12
-
-        for ln in body_lines:
-            if y < text_bottom_limit + 0.3 * cm:
-                break
-            if not ln.strip():
-                y -= 0.18 * cm
-                continue
-            # skip markdown figure hints (embedded via SLIDE_ASSETS)
-            if "presentation_assets/" in ln or "figures/" in ln or ln.strip().startswith("**Рисунок"):
-                continue
-            if ln.strip().startswith("|"):
-                if show_fig:
-                    continue  # tables live in PNG assets
-                row = _strip_md(ln.strip())
-                c.setFont(font, 9)
-                c.drawString(margin_x, y, row[:120])
-                y -= 0.42 * cm
-                continue
-            text = _strip_md(ln.strip())
-            if text.startswith("- "):
-                text = "• " + text[2:]
-            # Prefer bullets; allow a few non-bullet lines (title slide headlines)
-            if text.startswith("•"):
-                bullet_count += 1
-                if bullet_count > max_bullets:
-                    continue
-            elif show_fig and i != 0 and len(text) > 70:
-                continue
-            size = 12 if i == 0 else 10.5
-            use_bold = i == 0 and not text.startswith("•")
-            c.setFont(font_b if use_bold else font, size)
-            words = text.split()
-            line = ""
-            for w in words:
-                trial = (line + " " + w).strip()
-                if c.stringWidth(trial, font_b if use_bold else font, size) < max_text_w:
-                    line = trial
-                else:
-                    c.drawString(margin_x, y, line)
-                    y -= 0.48 * cm
-                    line = w
-                    if y < text_bottom_limit + 0.3 * cm:
-                        break
-            if line and y >= text_bottom_limit + 0.3 * cm:
-                c.drawString(margin_x, y, line)
-                y -= 0.48 * cm
-
-        if show_fig:
-            try:
-                img = ImageReader(str(fig))
-                nat_w, nat_h = img.getSize()
-                # Image band: from just below text floor down to above footer
-                band_top = text_bottom_limit - 0.15 * cm
-                band_bottom = footer_h + 0.15 * cm
-                band_h = max(band_top - band_bottom, 4 * cm)
-                band_w = W - 2 * margin_x
-                # Contain: max size inside band, centered (wider than old side-float)
-                scale = min(band_w / nat_w, band_h / nat_h)
-                iw, ih = nat_w * scale, nat_h * scale
-                x_img = (W - iw) / 2
-                y_img = band_bottom + (band_h - ih) / 2
-                c.drawImage(
-                    img, x_img, y_img, width=iw, height=ih,
-                    preserveAspectRatio=True, anchor="c", mask="auto",
-                )
-            except Exception as e:
-                c.setFont(font, 8)
-                c.drawString(margin_x, footer_h + 0.5 * cm, f"[fig err: {e}]")
-
-        c.showPage()
-
-    c.save()
-    print(f"OK slides -> {OUT_SLIDES}")
+    build_jury()
 
 
 def main():
-    if not MD_REPORT.exists():
-        print(f"Missing {MD_REPORT}", file=sys.stderr)
-        sys.exit(1)
-    build_report_pdf()
+    slides_only = "--slides-only" in sys.argv
+    if not slides_only:
+        if not MD_REPORT.exists():
+            print(f"Missing {MD_REPORT}", file=sys.stderr)
+            sys.exit(1)
+        build_report_pdf()
     build_slides_pdf()
     print("Done.")
 
