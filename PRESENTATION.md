@@ -1,4 +1,14 @@
-# Фрагмент для презентации / ответа жюри
+# ⚠️ Это НЕ основная презентация
+
+**Главная презентация (слайды для питча) → [docs/TASK1_presentation.pdf](docs/TASK1_presentation.pdf)**
+
+Откройте PDF по ссылке выше. GitHub показывает PDF прямо в браузере (кнопка Download — если нужен файл).
+
+---
+
+# Шпаргалка / фрагмент для ответа жюри
+
+Ниже — краткие цифры и формулировки для устных ответов. Это **не** замена слайдам.
 
 ## Основной метод
 
@@ -34,6 +44,7 @@
 
 ## Материалы
 
+- **Презентация (главное):** [docs/TASK1_presentation.pdf](docs/TASK1_presentation.pdf)
 - Отчёт: `docs/TASK1_METHOD_REPORT.md` / `docs/TASK1_method_report.pdf`
-- Слайды: `docs/TASK1_slides.md` / `docs/TASK1_presentation.pdf`
+- Текст слайдов: `docs/TASK1_slides.md`
 - Гайд: `JURY_GUIDE.md`
