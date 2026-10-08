@@ -149,18 +149,18 @@ def slide02_idea(d):
     ax.set_ylim(0, 1)
     ax.axis("off")
     ax.set_title(
-        "Два типа территорий по структуре расходов — затем прогноз и сдвиги",
+        "Два типа территорий по структуре расходов → прогноз и сдвиги",
         color=C_ACCENT, fontsize=13, pad=10, fontweight="bold",
     )
 
     # Self-contained grouping (no Task 1 prerequisite)
-    _card(ax, 0.18, 0.70, 0.64, 0.18, ec=C_ACCENT, fc="#e8eef5", lw=2)
-    ax.text(0.50, 0.84, "2 режима потребления · 140 / 140",
-            ha="center", fontsize=12, fontweight="bold", color=C_ACCENT)
+    _card(ax, 0.14, 0.68, 0.72, 0.20, ec=C_ACCENT, fc="#e8eef5", lw=2)
+    ax.text(0.50, 0.84, "Группируем МО в 2 режима потребления (140 / 140)",
+            ha="center", fontsize=11, fontweight="bold", color=C_ACCENT)
     ax.text(
-        0.50, 0.76,
-        "Тип A ↑ grocery   ·   Тип B ↑ food / transport",
-        ha="center", fontsize=10, color=C_INK,
+        0.50, 0.75,
+        "Тип A · сельский (↑ grocery)   ·   Тип B · городской (↑ food / transport)",
+        ha="center", fontsize=9.5, color=C_INK,
     )
 
     # arrows down

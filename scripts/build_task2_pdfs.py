@@ -233,7 +233,12 @@ def build_report_pdf():
             in_code = False
             return
         text = "\n".join(code_buf)
-        is_arch = ("УРОВЕНЬ A" in text) or ("УРОВЕНЬ B" in text) or ("Подготовка (один раз)" in text)
+        is_arch = (
+            ("УРОВЕНЬ A" in text)
+            or ("УРОВЕНЬ B" in text)
+            or ("Вход Task 2" in text)
+            or ("Подготовка (один раз)" in text)
+        )
         style = styles["ArchCodeR"] if is_arch else styles["CodeR"]
         block = [Preformatted(text, style)]
         if pending_h2 is not None:
