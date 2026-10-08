@@ -224,7 +224,7 @@ def build_report_pdf():
         if m_img:
             flush_table()
             alt, rel = m_img.group(1), m_img.group(2)
-            img_path = (DOCS / rel).resolve() if not Path(rel).is_absolute() else Path(rel)
+            img_path = (ROOT / rel).resolve() if not Path(rel).is_absolute() else Path(rel)
             if not img_path.exists():
                 # try figures/
                 name = Path(rel).name

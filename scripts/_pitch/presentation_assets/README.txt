@@ -15,4 +15,5 @@ slide10_value_quote.png             -> 10 ANALYST VALUE
 slide11_finale.png                  -> 11 FINALE
 
 Rebuild: python scripts/make_pitch_assets.py
-PDF:     python scripts/build_task1_pdfs.py --slides-only
+PDF:     python scripts/build_jury_slides.py
+PDF out: для_жюри/TASK1_presentation.pdf

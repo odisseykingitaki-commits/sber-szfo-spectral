@@ -24,3 +24,6 @@ results/_bak*/
 
 # local visual QA renders of slides
 scripts/_pitch/presentation_assets/_qa/
+
+# non-jury leftovers
+_archive/
