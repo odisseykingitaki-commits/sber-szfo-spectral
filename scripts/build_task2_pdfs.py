@@ -448,12 +448,12 @@ def build_slides_pdf():
         # Stacked layout: short bullets on top, full-width image below (no side float)
         fig = SLIDE_ASSETS[i] if i < len(SLIDE_ASSETS) else None
         show_fig = bool(fig and fig.exists())
-        text_bottom_limit = (H * 0.48) if show_fig else footer_h + 0.4 * cm
+        text_bottom_limit = (H * 0.55) if show_fig else footer_h + 0.4 * cm
         max_text_w = W - 2 * margin_x
-        y = H - header_h - 0.7 * cm
+        y = H - header_h - 0.55 * cm
         c.setFillColor(colors.HexColor("#222222"))
         bullet_count = 0
-        max_bullets = 5 if show_fig else 12
+        max_bullets = 4 if show_fig else 12
         in_code = False
 
         for ln in body_lines:
@@ -513,16 +513,13 @@ def build_slides_pdf():
                 band_bottom = footer_h + 0.15 * cm
                 band_h = max(band_top - band_bottom, 4 * cm)
                 band_w = W - 2 * margin_x
-                scale = band_w / nat_w
-                iw, ih = band_w, nat_h * scale
-                if ih > band_h:
-                    scale = band_h / nat_h
-                    iw, ih = nat_w * scale, band_h
+                scale = min(band_w / nat_w, band_h / nat_h)
+                iw, ih = nat_w * scale, nat_h * scale
                 x_img = (W - iw) / 2
                 y_img = band_bottom + (band_h - ih) / 2
                 c.drawImage(
                     img, x_img, y_img, width=iw, height=ih,
-                    preserveAspectRatio=True, mask="auto",
+                    preserveAspectRatio=True, anchor="c", mask="auto",
                 )
             except Exception as e:
                 c.setFont(font, 8)
