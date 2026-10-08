@@ -158,7 +158,7 @@ def build_slide_flowables(slide: dict, idx: int, styles: dict):
     flows.append(Spacer(1, 4 * mm))
     flows.append(
         Paragraph(
-            esc(f"Task 1 · слайд {idx}/10 · репозиторий: (локально / будет на GitHub)"),
+            esc(f"Task 1 · слайд {idx}/10 · https://github.com/odisseykingitaki-commits/sber-szfo-spectral"),
             styles["foot"],
         )
     )
@@ -245,7 +245,7 @@ def build():
             story.append(Spacer(1, 2 * cm))
             story.append(
                 Paragraph(
-                    esc("Репозиторий: (локально / будет на GitHub)"),
+                    esc("Репозиторий: https://github.com/odisseykingitaki-commits/sber-szfo-spectral"),
                     styles["foot"],
                 )
             )

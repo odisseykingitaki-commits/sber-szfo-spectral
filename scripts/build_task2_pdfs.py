@@ -21,6 +21,7 @@ OUT_REPORT = DOCS / "TASK2_method_report.pdf"
 OUT_SLIDES = DOCS / "TASK2_presentation.pdf"
 MD_REPORT = DOCS / "TASK2_METHOD_REPORT.md"
 MD_SLIDES = DOCS / "TASK2_slides.md"
+REPO_URL = "https://github.com/odisseykingitaki-commits/sber-szfo-spectral"
 
 # Lean DeepSeek/user deck (9 slides). Architecture folded into idea;
 # MAE grid skipped (winners table only); CP consensus + PR₊ on one slide.
@@ -398,6 +399,7 @@ def build_slides_pdf():
     from reportlab.lib.units import cm
     from reportlab.pdfgen import canvas
     from reportlab.lib import colors
+    from reportlab.lib.utils import ImageReader
 
     font, font_b = _register_fonts()
     md = MD_SLIDES.read_text(encoding="utf-8")
@@ -422,66 +424,69 @@ def build_slides_pdf():
     page = landscape(A4)
     c = canvas.Canvas(str(OUT_SLIDES), pagesize=page)
     W, H = page
+    margin_x = 1.2 * cm
+    footer_h = 0.9 * cm
+    header_h = 1.4 * cm
 
     for i, (title, body_lines) in enumerate(slides):
         c.setFillColor(colors.HexColor("#f7f5f1"))
         c.rect(0, 0, W, H, fill=1, stroke=0)
         c.setFillColor(colors.HexColor("#1e3a5f"))
-        c.rect(0, H - 1.4 * cm, W, 1.4 * cm, fill=1, stroke=0)
+        c.rect(0, H - header_h, W, header_h, fill=1, stroke=0)
 
         c.setFillColor(colors.white)
         c.setFont(font_b, 15)
-        c.drawString(1.2 * cm, H - 0.9 * cm, title[:95])
+        c.drawString(margin_x, H - 0.9 * cm, title[:95])
 
         c.setFillColor(colors.HexColor("#666666"))
-        c.setFont(font, 8)
+        c.setFont(font, 7)
         c.drawRightString(
-            W - 1.0 * cm, 0.5 * cm,
-            f"Task 2 · {i + 1}/{len(slides)} · репозиторий: локально, публикация — после конкурса",
+            W - 1.0 * cm, 0.4 * cm,
+            f"Task 2 · {i + 1}/{len(slides)} · {REPO_URL}",
         )
 
-        # Visual-first pitch: PNG carries the message; short bullets on the left.
+        # Stacked layout: short bullets on top, full-width image below (no side float)
         fig = SLIDE_ASSETS[i] if i < len(SLIDE_ASSETS) else None
         show_fig = bool(fig and fig.exists())
-        last_i = len(slides) - 1
-        # Figure-dominant: title, idea, leakage, winners, rural, CP, final
-        fig_heavy = i in (0, 1, 2, 3, 4, 5, last_i)
-
-        y = H - 2.2 * cm
+        text_bottom_limit = (H * 0.48) if show_fig else footer_h + 0.4 * cm
+        max_text_w = W - 2 * margin_x
+        y = H - header_h - 0.7 * cm
         c.setFillColor(colors.HexColor("#222222"))
-        if show_fig and fig_heavy:
-            max_text_w = W * 0.34
-        elif show_fig:
-            max_text_w = W * 0.42
-        else:
-            max_text_w = W - 2.4 * cm
+        bullet_count = 0
+        max_bullets = 5 if show_fig else 12
+        in_code = False
 
         for ln in body_lines:
+            if y < text_bottom_limit + 0.3 * cm:
+                break
             if not ln.strip():
-                y -= 0.22 * cm
+                y -= 0.16 * cm
                 continue
             if "presentation_assets" in ln or "figures/" in ln or ln.strip().startswith("**Рисунок"):
                 continue
-            if ln.strip().startswith("```") or ln.strip() == "```":
+            if ln.strip().startswith("```"):
+                in_code = not in_code
                 continue
+            if in_code:
+                continue  # ASCII diagrams live in PNG
             if ln.strip().startswith("|"):
-                # winners table lives in PNG — skip ascii table on figure-heavy slides
-                if fig_heavy:
+                if show_fig:
                     continue
                 row = _strip_md(ln.strip())
                 c.setFont(font, 8.0)
-                c.drawString(1.2 * cm, y, row[:90])
-                y -= 0.38 * cm
-                if y < 1.5 * cm:
-                    break
+                c.drawString(margin_x, y, row[:110])
+                y -= 0.36 * cm
                 continue
             text = _strip_md(ln.strip())
             if text.startswith("- "):
                 text = "• " + text[2:]
-            # Skip long headline duplicate already in PNG for figure-heavy slides
-            if fig_heavy and not text.startswith("•") and len(text) > 40 and i != 0:
+            if text.startswith("•"):
+                bullet_count += 1
+                if bullet_count > max_bullets:
+                    continue
+            elif show_fig and i != 0 and len(text) > 55:
                 continue
-            size = 12 if i == 0 else 10
+            size = 12 if i == 0 else 10.5
             use_bold = i == 0 and not text.startswith("•")
             c.setFont(font_b if use_bold else font, size)
             words = text.split()
@@ -491,44 +496,37 @@ def build_slides_pdf():
                 if c.stringWidth(trial, font_b if use_bold else font, size) < max_text_w:
                     line = trial
                 else:
-                    c.drawString(1.2 * cm, y, line)
-                    y -= 0.48 * cm
+                    c.drawString(margin_x, y, line)
+                    y -= 0.46 * cm
                     line = w
-                    if y < 1.5 * cm:
+                    if y < text_bottom_limit + 0.3 * cm:
                         break
-            if line and y >= 1.5 * cm:
-                c.drawString(1.2 * cm, y, line)
-                y -= 0.48 * cm
-            if y < 1.5 * cm:
-                break
+            if line and y >= text_bottom_limit + 0.3 * cm:
+                c.drawString(margin_x, y, line)
+                y -= 0.46 * cm
 
         if show_fig:
             try:
-                from reportlab.lib.utils import ImageReader
-                if fig_heavy:
-                    iw, ih = 16.5 * cm, 9.2 * cm
-                    x_img = W - iw - 0.5 * cm
-                    y_img = 1.0 * cm
-                elif i in (0, last_i):
-                    iw, ih = 12.0 * cm, 7.4 * cm
-                    x_img = W - iw - 0.7 * cm
-                    y_img = 1.2 * cm
-                else:
-                    iw, ih = 11.2 * cm, 7.2 * cm
-                    x_img = W - iw - 0.7 * cm
-                    y_img = 1.2 * cm
+                img = ImageReader(str(fig))
+                nat_w, nat_h = img.getSize()
+                band_top = text_bottom_limit - 0.15 * cm
+                band_bottom = footer_h + 0.15 * cm
+                band_h = max(band_top - band_bottom, 4 * cm)
+                band_w = W - 2 * margin_x
+                scale = band_w / nat_w
+                iw, ih = band_w, nat_h * scale
+                if ih > band_h:
+                    scale = band_h / nat_h
+                    iw, ih = nat_w * scale, band_h
+                x_img = (W - iw) / 2
+                y_img = band_bottom + (band_h - ih) / 2
                 c.drawImage(
-                    ImageReader(str(fig)),
-                    x_img,
-                    y_img,
-                    width=iw,
-                    height=ih,
-                    preserveAspectRatio=True,
-                    mask="auto",
+                    img, x_img, y_img, width=iw, height=ih,
+                    preserveAspectRatio=True, mask="auto",
                 )
             except Exception as e:
                 c.setFont(font, 8)
-                c.drawString(W - 10 * cm, 2 * cm, f"[fig err: {e}]")
+                c.drawString(margin_x, footer_h + 0.5 * cm, f"[fig err: {e}]")
 
         c.showPage()
 

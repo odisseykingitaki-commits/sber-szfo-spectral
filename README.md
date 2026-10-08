@@ -15,7 +15,7 @@ python run_all.py
 Метод-отчёт (Task 1): [`docs/TASK1_METHOD_REPORT.md`](docs/TASK1_METHOD_REPORT.md) · PDF: [`docs/TASK1_method_report.pdf`](docs/TASK1_method_report.pdf).  
 Слайды: [`docs/TASK1_slides.md`](docs/TASK1_slides.md) · [`docs/TASK1_presentation.pdf`](docs/TASK1_presentation.pdf).  
 Конфиги (source of truth для жюри): `configs/config.yaml`, `configs/methods.yaml`.  
-Репозиторий: (локально / будет на GitHub).
+Репозиторий: https://github.com/odisseykingitaki-commits/sber-szfo-spectral
 
 ## Основной метод
 

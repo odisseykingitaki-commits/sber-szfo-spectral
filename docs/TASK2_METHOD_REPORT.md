@@ -3,7 +3,8 @@
 **Конкурс / проект:** спектральная синергетика экономических систем (СберИндекс)  
 **Объект:** агрегаты расходов двух режимов потребления МО СЗФО (Тип A / Тип B, 140/140)  
 **Два уровня:** (A) многомодельный прогноз горизонтов 1 / 3 / 6 / 12 мес.; (B) поиск changepoints на спектральном сигнале  
-**Репозиторий:** локально, публикация — после конкурса  
+**Репозиторий:** https://github.com/odisseykingitaki-commits/sber-szfo-spectral  
+
 **Воспроизведение:** `conda activate sber && python src/12_timeseries.py && python src/13_changepoints.py` (см. `INSTALL.md` §4b)
 
 Числа сверены с `results/forecast_all_models.csv`, `results/forecast_mae_post_leakage.md`, `results/changepoints_consensus.csv`, `results/TASK2_NOTES.md`, `results/dynamic_summary.json` (дамп после leakage-fix 2026-10-04).
@@ -309,7 +310,7 @@ python scripts/build_task2_pdfs.py
 | Пробелы | `docs/TASK2_GAPS.md` |
 | PDF | `docs/TASK2_method_report.pdf`, `docs/TASK2_presentation.pdf` |
 
-**Репозиторий:** локально, публикация — после конкурса.
+**Репозиторий:** https://github.com/odisseykingitaki-commits/sber-szfo-spectral
 
 ---
 

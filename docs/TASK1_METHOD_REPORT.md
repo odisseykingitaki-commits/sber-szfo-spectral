@@ -3,7 +3,8 @@
 **Конкурс / проект:** спектральная синергетика экономических систем (СберИндекс)  
 **Объект:** 280 муниципальных образований Северо-Западного ФО  
 **Основной метод:** медианный threshold по главной моде PLM (`U1 = X @ v1`)  
-**Репозиторий:** (локально / будет на GitHub)  
+**Репозиторий:** https://github.com/odisseykingitaki-commits/sber-szfo-spectral  
+
 **Воспроизведение:** `conda activate sber && python run_all.py` (см. `INSTALL.md`)
 
 Числа сверены с `results/TASK1_GUIDE_DUMP.md`, `results/final_no_income_summary.json`, `results/icvi_full.csv`, `results/variant_c_comparison.json` (дамп 2026-10-08).
@@ -245,7 +246,7 @@ python run_all.py
 Сводка: `results/final_no_income_summary.json`.  
 Конфиги для жюри (source of truth по параметрам): `configs/config.yaml`, `configs/methods.yaml` — скрипты пока дублируют константы; расхождений быть не должно.
 
-**Репозиторий:** (локально / будет на GitHub). Публичный remote создаётся отдельно (`git remote add origin …`).
+**Репозиторий:** https://github.com/odisseykingitaki-commits/sber-szfo-spectral
 
 ---
 

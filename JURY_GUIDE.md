@@ -173,9 +173,9 @@ python 13_changepoints.py
 - `LICENSE`, `CITATION.cff`, `requirements.txt`, `README.md`
 - результаты и фигуры уже лежат в `results/`, `figures/`
 
-Локальный **git init + commit** есть; **публичного remote / GitHub URL пока нет**.
+Публичный репозиторий: **https://github.com/odisseykingitaki-commits/sber-szfo-spectral**
 
-Формулировка для жюри: **пакет готов локально; репозиторий: (локально / будет на GitHub).** См. `INSTALL.md`.
+Формулировка для жюри: **пакет на GitHub** — см. `INSTALL.md`.
 
 ---
 

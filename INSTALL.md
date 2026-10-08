@@ -156,15 +156,12 @@ python scripts/build_task2_pdfs.py          # PDF отчёт + презента�
 
 ## 5. Git / GitHub
 
-Локальный репозиторий инициализируется командой `git init` (если ещё нет).  
-**Публичный remote не создаётся автоматически.** Когда будет готов GitHub:
+Публичный репозиторий: **https://github.com/odisseykingitaki-commits/sber-szfo-spectral**
 
 ```bash
-git remote add origin https://github.com/<org>/<repo>.git
+git remote add origin https://github.com/odisseykingitaki-commits/sber-szfo-spectral.git
 git push -u origin HEAD
 ```
-
-В текстах для жюри до появления remote: **«репозиторий: (локально / будет на GitHub)»**.
 
 ## 6. Канон vs legacy
 
