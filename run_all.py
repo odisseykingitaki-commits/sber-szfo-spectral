@@ -1,9 +1,7 @@
-﻿"""Запуск всего пайплайна по порядку.
+﻿"""Запуск пайплайна типологии по порядку.
 
 11 (threshold = основной метод) идёт до 08 (ICVI),
-чтобы labels_threshold.npy был доступен для «Наш».
-
-После задачи 1 (01–11): задача 2 — прогноз (12) и сдвиги (13).
+чтобы labels_threshold.npy был доступен для строки «Наш».
 """
 import subprocess
 import sys
@@ -21,9 +19,6 @@ SCRIPTS = [
     '08_icvi.py',              # «Наш» = threshold; Louvain — отдельно
     '09_bootstrap.py',         # threshold on U1
     '10_robustness.py',        # threshold on U1
-    # --- Задача 2 ---
-    '12_timeseries.py',        # прогноз расходов (+ Google Trends)
-    '13_changepoints.py',      # структурные сдвиги (ruptures + CUSUM)
 ]
 
 ROOT = Path(__file__).resolve().parent

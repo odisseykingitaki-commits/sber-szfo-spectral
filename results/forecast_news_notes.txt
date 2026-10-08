@@ -1,7 +1,0 @@
-GDELT fetch OK via gdelt package (events v2), sampled days [1,8,15,22]/month.
-Geo scope: RUSSIA-WIDE (ActionGeo RS / Actor RUS). NWFD FullName filter sparse (see gdelt_news_monthly.csv event_count_nwfd); not used as primary feature.
-Anti-leakage: news features are lag-1 (month t uses intensity of month t-1 only).
-cluster=0 H=12: too few rows after dropna (12)
-cluster=1 H=12: too few rows after dropna (12)
-Meaningful improvements (>1% rel MAE): cluster=1 H=1 rel_improve=0.056; cluster=1 H=1 news+trends vs trends rel=0.017
-SLIDE_CANDIDATE: News GDELT — partial wins listed above.

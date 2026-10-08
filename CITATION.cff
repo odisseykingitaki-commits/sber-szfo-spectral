@@ -3,25 +3,18 @@ message: "If you use this software, please cite it as below."
 title: "Spectral Synergetics of Economic Systems: PLM Analysis of SberIndex (SZFO)"
 authors:
   - name: "Research team"
-    # Replace with real author entries, e.g.:
-    # - family-names: Ivanov
-    #   given-names: Ivan
-    #   orcid: "https://orcid.org/0000-0000-0000-0000"
 type: software
 license: Apache-2.0
 year: 2026
 date-released: "2026-10-04"
 abstract: >-
-  Application of PLM spectral analysis to SberIndex data for clustering
-  280 municipalities of the Northwestern Federal District (Russia),
-  plus short-horizon expenditure forecasting and changepoint consensus
-  on spectral trajectories.
+  Application of PLM spectral analysis to SberIndex expenditure data for
+  clustering 280 municipalities of the Northwestern Federal District (Russia)
+  via a median threshold on the leading PLM mode.
 keywords:
   - spectral analysis
   - PLM
   - clustering
   - SberIndex
-  - forecasting
-  - changepoints
   - Northwestern Federal District
-repository-code: ""
+repository-code: "https://github.com/odisseykingitaki-commits/sber-szfo-spectral"
