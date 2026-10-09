@@ -1,5 +1,4 @@
-# Source of truth for jury / reproducibility (Task 1).
-# Scripts in src/ currently use matching constants; see INSTALL.md.
+# Source of truth for reproducibility. See INSTALL.md.
 # Optional loader: src/utils.py::load_config()
 
 paths:

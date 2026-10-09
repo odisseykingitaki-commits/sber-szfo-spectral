@@ -1,5 +1,4 @@
-# Method hyperparameters (Task 1). Source of truth for jury.
-# Scripts currently hardcode the same values — keep in sync.
+# Method hyperparameters. Scripts hardcode the same values — keep in sync.
 
 plm:
   C_reg: 0.2

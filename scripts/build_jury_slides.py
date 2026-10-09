@@ -1,7 +1,4 @@
-"""Build chart-first jury PDF: для_жюри/TASK1_presentation.pdf (11 landscape slides).
-
-Layout: conclusion headline → 2–4 short phrases → dominant chart (50–70%) → tiny footer.
-Does NOT dump the method report into slides.
+"""Build jury PDF: для_жюри/presentation.pdf (11 landscape slides).
 
     python scripts/build_jury_slides.py
 """
@@ -16,7 +13,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parent.parent
 JURY = ROOT / "для_жюри"
 ASSETS = ROOT / "scripts" / "_pitch" / "presentation_assets"
-OUT = JURY / "TASK1_presentation.pdf"
+OUT = JURY / "presentation.pdf"
 REPO_URL = "https://github.com/odisseykingitaki-commits/sber-szfo-spectral"
 
 C_BG = "#f4f6f8"
@@ -297,7 +294,7 @@ def build():
         c.setFillColor(colors.HexColor(C_MUTED))
         c.setFont(font, 7.5)
         left = s.get("footer") or ""
-        right = f"Task 1 · {i + 1}/11 · {REPO_URL}"
+        right = f"{i + 1}/11 · {REPO_URL}"
         # keep left footer short; full URL always on the right
         if left and "http" not in left:
             c.drawString(mx, 0.32 * cm, left[:100])

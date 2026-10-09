@@ -1,9 +1,9 @@
 # Спектральная синергетика экономических систем
 
-PLM-спектральная типология **280 МО** СЗФО по структуре расходов (СберИндекс).
+Типология **280 муниципалитетов** СЗФО по структуре расходов (СберИндекс).
 
-- **«Презентация для жюри»** → [`для_жюри/TASK1_presentation.pdf`](для_жюри/TASK1_presentation.pdf)
-- **«Методологический отчёт»** → [`для_жюри/TASK1_method_report.pdf`](для_жюри/TASK1_method_report.pdf) · [MD](для_жюри/TASK1_METHOD_REPORT.md)
-- **Как запустить** → [`INSTALL.md`](INSTALL.md) · **конфиги** → [`configs/`](configs/)
+1. **Презентация** → [`для_жюри/presentation.pdf`](для_жюри/presentation.pdf)
+2. **Метод** → [`для_жюри/method_report.pdf`](для_жюри/method_report.pdf) · [текст](для_жюри/method_report.md)
+3. **Запуск** → [`INSTALL.md`](INSTALL.md)
 
-https://github.com/odisseykingitaki-commits/sber-szfo-spectral
+Репозиторий: https://github.com/odisseykingitaki-commits/sber-szfo-spectral

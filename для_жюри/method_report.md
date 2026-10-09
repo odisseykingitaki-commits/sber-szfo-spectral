@@ -7,7 +7,7 @@
 
 **Воспроизведение:** `conda activate sber && python run_all.py` (см. `INSTALL.md`)
 
-Числа сверены с `results/TASK1_GUIDE_DUMP.md`, `results/final_no_income_summary.json`, `results/icvi_full.csv`, `results/variant_c_comparison.json` (дамп 2026-10-08).
+Числа сверены с `results/final_no_income_summary.json`, `results/icvi_full.csv`, `results/variant_c_comparison.json`.
 
 ---
 
@@ -179,7 +179,7 @@ Top-5 по |loading| (`evecs_v2.npy`):
 
 Интерпретация (паттерн расходов, не юрстатус МО): один полюс тяготеет к более высокой доле общественного питания / транспорта / масштаба расходов, другой — к более высокой доле продовольствия (grocery). Ярлык «городской / сельский» — удобная краткая метка этого контраста.
 
-Моды 2–5 (кратко): вариативность и рост marketplace; рост food / grocery; мобильность vs marketplace; cv_health / grocery — см. dump в `TASK1_GUIDE_DUMP.md`.
+Моды 2–5 (кратко): вариативность и рост marketplace; рост food / grocery; мобильность vs marketplace; cv_health / grocery — см. `results/evecs_v2.npy`.
 
 ---
 

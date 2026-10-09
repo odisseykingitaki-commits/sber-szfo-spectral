@@ -1,4 +1,4 @@
-# Установка и воспроизведение
+# Как запустить анализ
 
 ## 1. Окружение
 
@@ -8,30 +8,32 @@ conda activate sber
 pip install -r requirements.txt
 ```
 
-Конфиги `configs/config.yaml` и `configs/methods.yaml` — параметры для жюри.
+Параметры: `configs/config.yaml`, `configs/methods.yaml`.
 
 ## 2. Данные
 
-Положить исходники конкурса в `data/raw/` (zip/xlsx). Крупные raw zip уже в `.gitignore`.
+Положить исходники конкурса в `data/raw/` (zip/xlsx).
+
+Уже есть готовые артефакты для проверки результата:
 
 | Путь | Назначение |
 |------|------------|
-| `data/processed/features_szfo_v2_final.csv` | **17 признаков, без income** |
-| `results/labels_threshold.npy` | канонические метки **140 / 140** |
+| `data/processed/features_szfo_v2_final.csv` | 17 признаков |
+| `results/labels_threshold.npy` | итоговые метки **140 / 140** |
 
-## 3. Запуск
+## 3. Запуск всего пайплайна
 
 ```bash
 conda activate sber
 python run_all.py
 ```
 
-Порядок: `01` → `02` → `03` → `04` → `05` → `06` → **`11` (threshold)** → `07` → `08` → `09` → `10`
+Порядок скриптов: `01` → `02` → `03` → `04` → `05` → `06` → **`11` (основной метод)** → `07` → `08` → `09` → `10`.
 
-- `03_parse_urov.py` оставлен для ablation; финальные признаки **без доходов** (`include_rosstat_income: false`).
-- Если `03` падает из‑за отсутствия urov — временно уберите его из `run_all.py`; на no-income результат это не влияет при наличии features CSV.
+- Скрипт `03` (Росстат) нужен только для проверки «с доходами / без»; в финале доходов нет.
+- Если `03` падает из‑за отсутствия файла urov — уберите его из списка в `run_all.py`. На итоговый результат это не влияет, если уже есть features CSV.
 
-### По шагам
+### По шагам (по желанию)
 
 ```bash
 cd src
@@ -48,27 +50,12 @@ python 09_bootstrap.py
 python 10_robustness.py
 ```
 
-## 4. Канон меток
+## 4. Где смотреть результат
 
 | Файл | Смысл |
 |------|--------|
-| `results/labels_threshold.npy` | **основной** метод |
-| `results/labels_louvain.npy` | сеть Louvain |
-| `results/labels_final.npy` | **deprecated** = копия Louvain |
-
-Фигуры: `figures/fig_final.png`, `fig_network.png`, `fig_dynamic.png`, `fig_bootstrap.png`.
+| `results/labels_threshold.npy` | основной результат |
+| `results/labels_louvain.npy` | сетевой вариант (для сравнения) |
+| `figures/` | картинки к отчёту |
 
 Репозиторий: https://github.com/odisseykingitaki-commits/sber-szfo-spectral
-
----
-
-## Пересборка PDF (не нужно жюри)
-
-```bash
-pip install reportlab pillow pyyaml
-python scripts/make_pitch_assets.py
-python scripts/build_jury_slides.py
-# или: python scripts/build_task1_pdfs.py
-```
-
-Выход: `для_жюри/TASK1_method_report.pdf`, `для_жюри/TASK1_presentation.pdf`.
