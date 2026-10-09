@@ -56,6 +56,7 @@ python 10_robustness.py
 |------|--------|
 | `results/labels_threshold.npy` | основной результат |
 | `results/labels_louvain.npy` | сетевой вариант (для сравнения) |
-| `figures/` | картинки к отчёту |
+| `для_жюри/*.pdf` | готовые презентация и отчёт для жюри |
+| `figures/` | служебные PNG к отчёту (открывать не обязательно — уже в PDF) |
 
 Репозиторий: https://github.com/odisseykingitaki-commits/sber-szfo-spectral
