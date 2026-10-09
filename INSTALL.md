@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## 2. Данные
 
-Положить исходники конкурса в `data/raw/`. Пайплайн жёстко ждёт имена (см. `src/01_parse_spend.py`, `src/02_parse_mobility.py`):
+Положить исходники конкурса в `data/raw/`. Имена жёстко заданы в `src/01_parse_spend.py`, `src/02_parse_mobility.py`:
 
 | Файл в `data/raw/` | Статус в финале |
 |--------------------|-----------------|

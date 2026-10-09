@@ -1,21 +1,21 @@
 # Спектральная синергетика экономических систем
 
-**Источник данных: СберИндекс** (расходы муниципальных образований СЗФО, 2023–2024).
+**Источник данных: СберИндекс** (обязательные архивы конкурса — **оба используются** в финале).
 
-### Исходные данные СберИндекс (что реально загружает пайплайн)
+### Исходные данные СберИндекс (что реально берём)
 
-Оба обязательных архива конкурса **используются** в финальной матрице (p = 17). Кладутся в `data/raw/`.
+Оба zip кладутся в `data/raw/`. Финальная матрица: **p = 17**.
 
-| Архив | Скрипт | Что берём | Что получаем |
+| Архив | Парсер | Что берём | Что в финале |
 |-------|--------|-----------|--------------|
-| `potrebitelskie-beznalicnye-rashody-na-urovne-munizipalnyh-obrazovanij_ru_1764079373653.csv.zip` | `src/01_parse_spend.py` | колонки `mo`, `period`, `category_15`, `value` (2023-01…2024-12) | 16 признаков: `share_*`, `log_total`, `growth_*`, `cv_*` по 5 категориям |
-| `indeks-mobilnosti_ru_1764063764975.csv.zip` | `src/02_parse_mobility.py` | `ref_area`, `period`, `value` (две даты) | (1) фильтр МО СЗФО; (2) признак `mob_logratio` = `log1p(d2)−log1p(d1)` |
+| `potrebitelskie-beznalicnye-rashody-na-urovne-munizipalnyh-obrazovanij_ru_1764079373653.csv.zip` | `src/01_parse_spend.py` → `spend.parquet` | `mo`, `period`, `category_15`, `value` (2023-01…2024-12) | 16 признаков: `share_*`, `log_total`, `growth_*`, `cv_*` (5 категорий) |
+| `indeks-mobilnosti_ru_1764063764975.csv.zip` | `src/02_parse_mobility.py` → `mobility.parquet` | `ref_area`, `period`, `value` (две даты) | **да:** (1) фильтр МО СЗФО; (2) `mob_logratio = log1p(d2)−log1p(d1)` |
 
-SHA256 локальных файлов в `data/raw/` (для сверки жюри):  
+SHA256 локальных файлов в `data/raw/` (сверка жюри):  
 `potrebitelskie-…zip` → `E9A389E57DAD7EC723AC58470FDA2B2F870062A330EFA979CB3952DD7513416D`  
 `indeks-mobilnosti_…zip` → `348B6F58D54D840E417FFAD2ED8F10C3593E70706D8DCBC67D91ABF5F63106F8`
 
-Сборка признаков: `src/04_features.py` → `data/processed/features_szfo_v2_final.csv`. Подробнее — `для_жюри/method_report.md` § «Исходные данные».
+Сборка: `src/04_features.py` → `data/processed/features_szfo_v2_final.csv`. Росстат `urov` — только ablation, **не** в финале. Подробнее — `для_жюри/method_report.md` § «Исходные данные».
 
 Типология **280 муниципалитетов** по структуре расходов.
 
