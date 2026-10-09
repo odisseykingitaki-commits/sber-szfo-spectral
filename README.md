@@ -2,6 +2,21 @@
 
 **Источник данных: СберИндекс** (расходы муниципальных образований СЗФО, 2023–2024).
 
+### Исходные данные СберИндекс (что реально загружает пайплайн)
+
+Оба обязательных архива конкурса **используются** в финальной матрице (p = 17). Кладутся в `data/raw/`.
+
+| Архив | Скрипт | Что берём | Что получаем |
+|-------|--------|-----------|--------------|
+| `potrebitelskie-beznalicnye-rashody-na-urovne-munizipalnyh-obrazovanij_ru_1764079373653.csv.zip` | `src/01_parse_spend.py` | колонки `mo`, `period`, `category_15`, `value` (2023-01…2024-12) | 16 признаков: `share_*`, `log_total`, `growth_*`, `cv_*` по 5 категориям |
+| `indeks-mobilnosti_ru_1764063764975.csv.zip` | `src/02_parse_mobility.py` | `ref_area`, `period`, `value` (две даты) | (1) фильтр МО СЗФО; (2) признак `mob_logratio` = `log1p(d2)−log1p(d1)` |
+
+SHA256 локальных файлов в `data/raw/` (для сверки жюри):  
+`potrebitelskie-…zip` → `E9A389E57DAD7EC723AC58470FDA2B2F870062A330EFA979CB3952DD7513416D`  
+`indeks-mobilnosti_…zip` → `348B6F58D54D840E417FFAD2ED8F10C3593E70706D8DCBC67D91ABF5F63106F8`
+
+Сборка признаков: `src/04_features.py` → `data/processed/features_szfo_v2_final.csv`. Подробнее — `для_жюри/method_report.md` § «Исходные данные».
+
 Типология **280 муниципалитетов** по структуре расходов.
 
 1. **Презентация** → [`для_жюри/presentation.pdf`](для_жюри/presentation.pdf)

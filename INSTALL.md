@@ -12,7 +12,15 @@ pip install -r requirements.txt
 
 ## 2. Данные
 
-Положить исходники конкурса в `data/raw/` (zip/xlsx).
+Положить исходники конкурса в `data/raw/`. Пайплайн жёстко ждёт имена (см. `src/01_parse_spend.py`, `src/02_parse_mobility.py`):
+
+| Файл в `data/raw/` | Статус в финале |
+|--------------------|-----------------|
+| `potrebitelskie-beznalicnye-rashody-na-urovne-munizipalnyh-obrazovanij_ru_1764079373653.csv.zip` | **обязателен** — расходы → 16 признаков |
+| `indeks-mobilnosti_ru_1764063764975.csv.zip` | **обязателен** — фильтр МО СЗФО + `mob_logratio` |
+| `urov_2010-2024.xlsx` | опционально (только ablation; можно убрать `03` из `run_all.py`) |
+
+SHA256: spend `E9A389E57DAD7EC723AC58470FDA2B2F870062A330EFA979CB3952DD7513416D`, mobility `348B6F58D54D840E417FFAD2ED8F10C3593E70706D8DCBC67D91ABF5F63106F8`.
 
 Уже есть готовые артефакты для проверки результата:
 
