@@ -101,6 +101,7 @@ def slides_spec(m: dict):
                 "→ симметричная матрица J",
                 "→ готова к спектральному разложению",
             ],
+            "caption": "Матрица показывает статистические взаимосвязи признаков, но сама по себе не доказывает причинность.",
             "fig": "slide03_j_heatmap.png",
             "footer": "",
             "fig_frac": 0.68,
@@ -122,9 +123,10 @@ def slides_spec(m: dict):
                 "Log total +0.327 · Health +0.279",
                 "Два полюса — паттерны потребления, не юр. статус МО.",
             ],
+            "caption": "Положительные и отрицательные нагрузки описывают противоположные направления одной оси. Они показывают, какие признаки формируют контраст между полюсами.",
             "fig": "slide05_mode1_loadings.png",
             "footer": "",
-            "fig_frac": 0.68,
+            "fig_frac": 0.66,
         },
         {
             "title": "Одна ось превращает 17 признаков в два режима",
@@ -132,9 +134,10 @@ def slides_spec(m: dict):
                 "U₁ = X · v₁ · порог = медиана → 140 / 140",
                 "Типология строится по главной коллективной оси.",
             ],
+            "caption": "Для типологии мы делим главную ось по медиане. Так получаем два равных типа — по 140 МО.",
             "fig": "slide06_U1_median_split.png",
             "footer": "не заранее выбранные 2 кластера",
-            "fig_frac": 0.72,
+            "fig_frac": 0.68,
         },
         {
             "title": "Структура не исчезает, если изменить настройки",
@@ -247,6 +250,27 @@ def build():
             c.setFont(font, 12)
             c.drawString(mx, y, ph)
             y -= 0.48 * cm
+
+        # optional small protective caption (muted, wrapped)
+        cap = s.get("caption") or ""
+        if cap:
+            y -= 0.08 * cm
+            c.setFillColor(colors.HexColor(C_MUTED))
+            c.setFont(font, 9)
+            max_cap_w = W - 2 * mx
+            words = cap.split()
+            line = ""
+            for w in words:
+                trial = (line + " " + w).strip()
+                if c.stringWidth(trial, font, 9) <= max_cap_w:
+                    line = trial
+                else:
+                    c.drawString(mx, y, line)
+                    y -= 0.36 * cm
+                    line = w
+            if line:
+                c.drawString(mx, y, line)
+                y -= 0.40 * cm
 
         # figure band — fill nearly all remaining space (chart-first)
         fig_path = ASSETS / s["fig"]
