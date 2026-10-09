@@ -3,9 +3,20 @@
 11 (threshold = основной метод) идёт до 08 (ICVI),
 чтобы labels_threshold.npy был доступен для строки «Наш».
 """
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+# Windows cp1251 console cannot print ✓/❌ — force UTF-8 for child scripts
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+os.environ.setdefault("PYTHONUTF8", "1")
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 SCRIPTS = [
     '01_parse_spend.py',
