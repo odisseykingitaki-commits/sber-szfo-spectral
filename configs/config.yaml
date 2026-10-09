@@ -24,7 +24,7 @@ plm:
   log_transform: log1p          # log_total, mob_logratio parts
 
 cluster:
-  method: threshold             # canonical: median U1 = X @ v1
+  method: threshold             # canonical: median U1 = X · v1
   equal_sizes_by_construction: true  # 140/140 at even N, no median ties
 
 dynamics:

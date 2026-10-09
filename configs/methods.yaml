@@ -10,11 +10,11 @@ plm:
 
 threshold:
   rule: "label = (U1 > median(U1))"
-  U1: "X @ v1"          # v1 = leading eigenvector of J
+  U1: "X · v1"          # v1 = leading eigenvector of J
   canonical: true
 
 louvain:
-  distance_space: "U = X @ V[:, :5]"   # first 5 modes
+  distance_space: "U = X · V[:, :5]"   # first 5 modes
   quantile_eps: 0.40                  # ε ≈ 3.781 on nonzero distances
   resolution: 0.5
   seed: 42
