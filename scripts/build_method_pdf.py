@@ -1,20 +1,26 @@
-"""Build для_жюри/method_report.pdf from markdown + figures (reportlab)."""
+"""Build для_жюри/method_report.pdf from markdown + figures (reportlab).
+
+CRITICAL: all text styles (body, headings, tables, code) must use a TTF with
+Cyrillic glyphs. Courier/Helvetica produce black-square tofu for Russian.
+"""
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm, mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Image,
     KeepTogether,
     ListFlowable,
     ListItem,
-    PageBreak,
     Paragraph,
     Preformatted,
     SimpleDocTemplate,
@@ -28,38 +34,74 @@ MD = ROOT / "для_жюри" / "method_report.md"
 OUT = ROOT / "для_жюри" / "method_report.pdf"
 FIGURES = ROOT / "figures"
 
-# Prefer DejaVu for Cyrillic
-FONT_REG = "Helvetica"
-FONT_BOLD = "Helvetica-Bold"
-try:
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
 
-    candidates = [
-        Path(r"C:\Windows\Fonts\arial.ttf"),
-        Path(r"C:\Windows\Fonts\calibri.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+def _register_cyrillic_fonts() -> tuple[str, str, str]:
+    """Return (regular, bold, mono) registered font names. Fail loud if missing."""
+    windir = Path(r"C:\Windows\Fonts")
+    pairs = [
+        (windir / "arial.ttf", windir / "arialbd.ttf"),
+        (windir / "Arial.ttf", windir / "Arialbd.ttf"),
+        (windir / "calibri.ttf", windir / "calibrib.ttf"),
+        (windir / "times.ttf", windir / "timesbd.ttf"),
+        (Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")),
     ]
-    bold_cands = [
-        Path(r"C:\Windows\Fonts\arialbd.ttf"),
-        Path(r"C:\Windows\Fonts\calibrib.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    # Prefer DejaVu Sans Mono (full Cyrillic). Avoid Courier/Consolas pitfalls
+    # with reportlab subsetting; fall back to the same body TTF as mono.
+    mono_cands = [
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"),
+        windir / "DejaVuSansMono.ttf",
     ]
-    for reg, bold in zip(candidates, bold_cands):
-        if reg.exists() and bold.exists():
-            pdfmetrics.registerFont(TTFont("DocFont", str(reg)))
-            pdfmetrics.registerFont(TTFont("DocFont-Bold", str(bold)))
-            FONT_REG = "DocFont"
-            FONT_BOLD = "DocFont-Bold"
+
+    reg_path = bold_path = None
+    for reg, bold in pairs:
+        if reg.exists():
+            reg_path, bold_path = reg, (bold if bold.exists() else reg)
             break
-except Exception:
-    pass
+    if reg_path is None:
+        raise FileNotFoundError(
+            "No Cyrillic TTF found (Arial/Calibri/Times/DejaVu). "
+            "Cannot build method_report.pdf without embedding a Cyrillic font."
+        )
+
+    pdfmetrics.registerFont(TTFont("DocFont", str(reg_path)))
+    pdfmetrics.registerFont(TTFont("DocFont-Bold", str(bold_path)))
+
+    # Code fences in this report mix Russian prose (§3.4) with Latin symbols —
+    # always use a proven Cyrillic face (body TTF), not legacy Courier.
+    mono_path = next((p for p in mono_cands if p.exists()), reg_path)
+    pdfmetrics.registerFont(TTFont("DocMono", str(mono_path)))
+    print(f"Fonts: body={reg_path.name} bold={bold_path.name} mono={mono_path.name}")
+    return "DocFont", "DocFont-Bold", "DocMono"
+
+
+FONT_REG, FONT_BOLD, FONT_MONO = _register_cyrillic_fonts()
+
+# Arial lacks these; without remap they render as empty boxes (not Cyrillic tofu).
+_GLYPH_FIX = str.maketrans({
+    "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
+    "₆": "6", "₇": "7", "₈": "8", "₉": "9", "₀": "0",
+    "₊": "+", "₋": "-",
+    "∈": "in",
+})
+
+
+def _fix_glyphs(s: str) -> str:
+    # MD sometimes stores HTML entities literally; decode before reportlab escape
+    s = s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+    return s.translate(_GLYPH_FIX)
 
 
 def esc(s: str) -> str:
+    s = _fix_glyphs(s)
     s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
-    s = re.sub(r"`([^`]+)`", r"<font face='Courier' size='8'>\1</font>", s)
+    # Inline code must use Cyrillic-capable mono — never Courier
+    s = re.sub(
+        r"`([^`]+)`",
+        rf"<font face='{FONT_MONO}' size='8'>\1</font>",
+        s,
+    )
     return s
 
 
@@ -74,6 +116,10 @@ def parse_table(lines: list[str]) -> list[list[str]]:
 
 
 def build():
+    if not MD.exists():
+        print(f"Missing {MD}", file=sys.stderr)
+        sys.exit(1)
+
     text = MD.read_text(encoding="utf-8")
     styles = getSampleStyleSheet()
     styles.add(
@@ -120,7 +166,7 @@ def build():
     styles.add(
         ParagraphStyle(
             name="Coderu",
-            fontName="Courier",
+            fontName=FONT_MONO,  # Cyrillic-capable (Consolas / Arial fallback)
             fontSize=7.5,
             leading=9.5,
             backColor=colors.HexColor("#f4f4f4"),
@@ -162,6 +208,8 @@ def build():
         if mimg:
             caption, rel = mimg.group(1), mimg.group(2)
             img_path = (MD.parent / rel).resolve()
+            if not img_path.exists():
+                img_path = FIGURES / Path(rel).name
             if img_path.exists():
                 im = Image(str(img_path), width=15 * cm, height=9 * cm, kind="proportional")
                 story.append(KeepTogether([im, Paragraph(esc(caption or img_path.name), styles["Capt"])]))
@@ -194,7 +242,7 @@ def build():
                 buf.append(lines[i])
                 i += 1
             i += 1
-            story.append(Preformatted("\n".join(buf), styles["Coderu"]))
+            story.append(Preformatted(_fix_glyphs("\n".join(buf)), styles["Coderu"]))
             continue
 
         if line.strip().startswith("|"):
@@ -235,11 +283,18 @@ def build():
                     ListItem(
                         Paragraph(esc(lines[i].strip()[2:]), styles["Bodyru"]),
                         leftIndent=8,
+                        bulletFontName=FONT_REG,
                     )
                 )
                 i += 1
             story.append(
-                ListFlowable(items, bulletType="bullet", start="•", leftIndent=12)
+                ListFlowable(
+                    items,
+                    bulletType="bullet",
+                    start="•",
+                    leftIndent=12,
+                    bulletFontName=FONT_REG,
+                )
             )
             continue
 
@@ -249,11 +304,20 @@ def build():
             while i < len(lines) and re.match(r"^\d+\.\s", lines[i].strip()):
                 body = re.sub(r"^\d+\.\s", "", lines[i].strip())
                 items.append(
-                    ListItem(Paragraph(esc(body), styles["Bodyru"]), leftIndent=8)
+                    ListItem(
+                        Paragraph(esc(body), styles["Bodyru"]),
+                        leftIndent=8,
+                        bulletFontName=FONT_REG,
+                    )
                 )
                 i += 1
             story.append(
-                ListFlowable(items, bulletType="1", leftIndent=12)
+                ListFlowable(
+                    items,
+                    bulletType="1",
+                    leftIndent=12,
+                    bulletFontName=FONT_REG,
+                )
             )
             continue
 

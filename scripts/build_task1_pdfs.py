@@ -58,7 +58,17 @@ def _register_fonts():
     return "Body", "BodyBold"
 
 
+# Arial misses Unicode subscripts; remap so PDF has no empty boxes.
+_GLYPH_FIX = str.maketrans({
+    "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5",
+    "₆": "6", "₇": "7", "₈": "8", "₉": "9", "₀": "0",
+    "₊": "+", "₋": "-",
+    "∈": "in",
+})
+
+
 def _strip_md(text: str) -> str:
+    text = text.translate(_GLYPH_FIX)
     text = re.sub(r"!\[([^\]]*)\]\([^)]+\)", r"[рис.: \1]", text)
     text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
     text = text.replace("**", "").replace("__", "")
@@ -138,8 +148,18 @@ def build_report_pdf():
         name="MetaR", fontName=font, fontSize=8.5, leading=11,
         textColor=colors.HexColor("#444444"), spaceAfter=3,
     ))
+    # Code blocks often contain Russian (e.g. §3.4) — never use Courier
+    mono = font
+    windir = Path(r"C:\Windows\Fonts")
+    for mp in (windir / "consola.ttf", windir / "cour.ttf"):
+        if mp.exists():
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            pdfmetrics.registerFont(TTFont("CodeMono", str(mp)))
+            mono = "CodeMono"
+            break
     styles.add(ParagraphStyle(
-        name="CodeR", fontName=font, fontSize=8, leading=10,
+        name="CodeR", fontName=mono, fontSize=8, leading=10,
         backColor=colors.HexColor("#f4f4f4"), leftIndent=6, spaceAfter=6,
     ))
     styles.add(ParagraphStyle(
@@ -199,7 +219,7 @@ def build_report_pdf():
         if not code_buf:
             in_code = False
             return
-        text = "\n".join(code_buf)
+        text = "\n".join(code_buf).translate(_GLYPH_FIX)
         story.append(Preformatted(text, styles["CodeR"]))
         code_buf = []
         in_code = False
